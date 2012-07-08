@@ -1,6 +1,8 @@
 *.beam
 *.app
-lib/fixUtils/.eunit/*
+deps/fixUtils/
+deps/lager/
 .eunit/*
 .project
 .settings/*
+
