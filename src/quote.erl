@@ -11,11 +11,19 @@
 %%
 %% Exported Functions
 %%
--export([reply/3, ini/0, sendQuote/1]).
+-export([reply/3, ini/0, get_mod/0, get_ip/0, get_port/0, get_fix_version/0]).
 
 %%
 %% API Functions
 %%
+get_mod() ->
+    server.
+get_port() ->
+    12345.
+get_fix_version() ->
+    "FIX_4_2".
+get_ip() ->
+    localhost.
 reply(#quote{standardHeader = #standardHeader{msgSeqNum =999}},  _SeqNumIn, _SeqNumOut)->
     io:format("Quote - END: ~p~n", [erlang:now()]),
     ok;
