@@ -5,9 +5,10 @@
   {registered, []},
   {applications, [
                   kernel,
-                  stdlib
+                  stdlib,
+                  lager
                  ]},
-  {mod, { fixTestErl_app, []}},
+  {mod, { fixTestErl_app, [quote]}},
   {env, [  {lager, [
     {handlers, [
       {lager_console_backend, info},

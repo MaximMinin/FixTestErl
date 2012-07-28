@@ -12,9 +12,10 @@
 %% Application callbacks
 %% ===================================================================
 
-start(_StartType, _StartArgs) ->
-    fixTestErl_sup:start_link(quote, server, localhost, 12345, "FIX_4_2"),
-    fixTestErl_sup:start_link(quoteRequest, client, localhost, 12345, "FIX_4_2").
+start(_StartType, [Callback]) ->
+    fixTestErl_sup:start_link(Callback, Callback:get_mod(), Callback:get_ip(), Callback:get_port(), Callback:get_fix_version()).
+%%     fixTestErl_sup:start_link(quote, server, localhost, 12345, "FIX_4_2"),
+%%     fixTestErl_sup:start_link(quoteRequest, client, localhost, 12345, "FIX_4_2").
 
 stop(_State) ->
     ok.
