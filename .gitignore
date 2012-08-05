@@ -1,7 +1,10 @@
+rebar
+*~
 *.beam
 *.app
-deps/fixUtils/
-deps/lager/
+deps/*/
+*/*/deps/*
+examples/quote*/rel/quote*/
 .eunit/*
 .project
 .settings/*
