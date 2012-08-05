@@ -8,7 +8,7 @@
                   stdlib,
                   lager
                  ]},
-  {mod, { fixTestErl_app, [quote]}},
+  {mod, { fixTestErl, []}},
   {env, [  {lager, [
     {handlers, [
       {lager_console_backend, info},

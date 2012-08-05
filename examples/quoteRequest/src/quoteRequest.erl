@@ -6,7 +6,7 @@
 %%
 %% Include files
 %%
--include("FIX_4_2.hrl").
+-include("../deps/fixTestErl/include/FIX_4_2.hrl").
 %%
 %% Exported Functions
 %%
@@ -40,14 +40,20 @@ ini()->
  
  ].
 
+reply(M, I, O) ->
+    io:format("QuoteRequestWorker get message: ~p~n", [M]),
+    reply_local(M,I,O).
+%%
+%% Local Functions
+%%
 
 %% LOGON -> ok
 %% <<"8=FIX.4.2",1,"9=67",1,"35=A",1,"49=TEST_TWO",1,"56=TEST_ONE",1,"34=18",1,
 %% "52=20120529-14:42:25.795",1,"98=0",1,"108=30",1,"10=048",1>>.
-reply(#logon{standardHeader = #standardHeader{senderCompID = <<"TEST_ONE">>, 
+reply_local(#logon{standardHeader = #standardHeader{senderCompID = <<"TEST_ONE">>, 
                                               targetCompID = <<"TEST_TWO">> }}, _In, _Out) ->
     ok;
-reply(#logon{standardHeader = #standardHeader{senderCompID = Sender}}, SeqNumIn, _Out) ->
+reply_local(#logon{standardHeader = #standardHeader{senderCompID = Sender}}, SeqNumIn, _Out) ->
     [#logout{text = <<"Sender unknown">>,
             standardHeader = #standardHeader{beginString = auto,
                                              bodyLength = auto,
@@ -62,7 +68,7 @@ reply(#logon{standardHeader = #standardHeader{senderCompID = Sender}}, SeqNumIn,
     ];
 %% <<"8=FIX.4.2",1,"9=55",1,"35=5",1,"49=TEST_TWO",1,"56=TEST_ONE",1,
 %% "34=19",1,"52=20120529-14:42:29.619",1,"10=008",1>>
-reply(#logout{}, _In, _Out) ->
+reply_local(#logout{}, _In, _Out) ->
     ok;
 %% QUOTEREQUSET -> QUOTE
 %%
@@ -70,7 +76,7 @@ reply(#logout{}, _In, _Out) ->
 %%  "52=20120529-14:44:59.831",1,"131=136c5f825ea",1,"117=QuoteId795",1,
 %% "55=DE0007093353",1,"48=DE0007093353",1,"22=4",1,"132=5.31",1,"133=5.33",1,
 %% "134=1000",1,"135=1000",1,"62=20120529-14:45:59",1,"10=219",1>>.
-reply(#quoteRequest{quoteReqID = QuoteReqID, 
+reply_local(#quoteRequest{quoteReqID = QuoteReqID, 
                     repeatingReg_quoteRequest_146 = [#repeatingReg_quoteRequest_146{symbol = Isin,
                                                                                    securityID = Wkn}]}, 
       SeqNumIn, _SeqNumOut)->
@@ -104,7 +110,7 @@ reply(#quoteRequest{quoteReqID = QuoteReqID,
 %% "207=F",1,"54=1",1,"38=100",1,"40=D",1,"59=6",1,
 %% "432=20120418",1,"32=0",1,"31=0",1,"151=100",1,"14=0",1,"6=0",1,
 %% "60=20120529-14:45:02.984",1,"21=1",1,"10=254",1>>
-reply(#orderSingle{quoteID = QuoteId, clOrdID = OrderId}, SeqNumIn, _SeqNumOut) ->
+reply_local(#orderSingle{quoteID = QuoteId, clOrdID = OrderId}, SeqNumIn, _SeqNumOut) ->
     [
      #executionReport{
                       clOrdID = OrderId,
@@ -126,7 +132,7 @@ reply(#orderSingle{quoteID = QuoteId, clOrdID = OrderId}, SeqNumIn, _SeqNumOut) 
 %%
 %% <<""8=FIX.4.2",1,"9=55",1,"35=0",1,"49=TEST_TWO",1,"56=TEST_ONE",1,
 %% "34=21",1,"52=20120529-14:42:36.235",1,"10=244",1>>.
-reply(#testRequest{testReqID = TestReqID}, SeqNumIn, _SeqNumOut) ->
+reply_local(#testRequest{testReqID = TestReqID}, SeqNumIn, _SeqNumOut) ->
   [
      #heartbeat{standardHeader = #standardHeader{beginString = auto, 
                                                           bodyLength = auto, 
@@ -144,7 +150,7 @@ reply(#testRequest{testReqID = TestReqID}, SeqNumIn, _SeqNumOut) ->
 %% <<"8=FIX.4.2",1,"9=63",1,"35=3",1,"49=TEST_TWO",1,"56=TEST_ONE",1,"34=23",1,
 %% "52=20120529-14:42:43.780",1,"45=1872",1,"10=116",1>>.
 
-reply(_Msg, SeqNumIn, SeqNumOut)->
+reply_local(_Msg, SeqNumIn, SeqNumOut)->
     [
      #reject{
              refSeqNum = SeqNumOut,
@@ -158,10 +164,3 @@ reply(_Msg, SeqNumIn, SeqNumOut)->
              standardTrailer = #standardTrailer{checkSum = auto}
              }
      ].
-
-
-
-%%
-%% Local Functions
-%%
-

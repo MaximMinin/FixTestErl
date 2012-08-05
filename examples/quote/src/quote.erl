@@ -7,28 +7,30 @@
 %%
 %% Include files
 %%
--include("FIX_4_2.hrl").
+-include("../deps/fixTestErl/include/FIX_4_2.hrl").
 %%
 %% Exported Functions
 %%
--export([reply/3, ini/0, get_mod/0, get_ip/0, get_port/0, get_fix_version/0]).
+-export([reply/3, ini/0, get_mod/0, get_ip/0, get_port/0, get_fix_version/0, sendQuote/1]).
 
 %%
 %% API Functions
 %%
 get_mod() ->
-    server.
+    client.
 get_port() ->
     12345.
 get_fix_version() ->
     "FIX_4_2".
 get_ip() ->
     localhost.
+
+
 reply(#quote{standardHeader = #standardHeader{msgSeqNum =999}},  _SeqNumIn, _SeqNumOut)->
     io:format("Quote - END: ~p~n", [erlang:now()]),
     ok;
 reply(#heartbeat{} = H, _SeqNumIn, _SeqNumOut)->
-%%     io:format("Quote - Heartbeat: ~p~n", [H]),
+    io:format("Quote - Heartbeat: ~p~n", [H]),
     [#heartbeat{ standardHeader = #standardHeader{beginString = auto,
                                                           msgType = heartbeat,
                                                           bodyLength = auto,
@@ -37,8 +39,8 @@ reply(#heartbeat{} = H, _SeqNumIn, _SeqNumOut)->
                                                 },
                 standardTrailer = #standardTrailer{checkSum=auto}
                }];
-reply(Msg,  _SeqNumIn, _SeqNumOut)->
-%%     io:format("Quote - Msg: ~p~n", [Msg]),
+reply(_Msg,  _SeqNumIn, _SeqNumOut)->
+%%    io:format("Quote - Msg: ~p~n", [Msg]),
     ok.
 
 ini()->
@@ -65,19 +67,18 @@ sendQuote(1000)->
     io:format("END: ~p ~n", [erlang:now()]),
     ok;
 sendQuote(Number)->
-%%     timer:sleep(5000),
-    test_case_worker:send(?MODULE, [#quoteRequest{standardHeader = #standardHeader{beginString = auto, 
-                                                                                   bodyLength=auto,
-                                                                                   msgType = quoteRequest,
-                                                                                   senderCompID = <<"TEST_ONE">>,
-                                                                                   targetCompID = <<"TEST_TWO">>,
-                                                                                   msgSeqNum = Number,
-                                                                                   sendingTime = helper:getNow()},
-                                                  quoteReqID = helper:getIniq(),
-                                                  repeatingReg_quoteRequest_146 = [#repeatingReg_quoteRequest_146{symbol = <<"TEST">>,
+timer:sleep(5000),
+test_case_worker:send(?MODULE, [#quoteRequest{standardHeader = #standardHeader{beginString = auto, 
+                                                                               bodyLength=auto,
+                                                                               msgType = quoteRequest,
+                                                                               senderCompID = <<"TEST_ONE">>,
+                                                                               targetCompID = <<"TEST_TWO">>,
+                                                                               msgSeqNum = Number,
+                                                                               sendingTime = helper:getNow()},
+                                  quoteReqID = helper:getIniq(),
+                                  repeatingReg_quoteRequest_146 = [#repeatingReg_quoteRequest_146{symbol = <<"TEST">>,
                                                                                    securityID = <<"TEST">>}],
                                                  standardTrailer = #standardTrailer{checkSum = auto}
                                                  }
                                    ]),
     sendQuote(Number+1).
-
