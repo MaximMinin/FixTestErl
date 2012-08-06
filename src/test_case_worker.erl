@@ -13,7 +13,9 @@
 
 %% --------------------------------------------------------------------
 %% External exports
--export([start_link/2, newMessage/2, getMessages/3, send/2]).
+-export([start_link/2, newMessage/2, 
+         getMessages/2, getMessages/3, 
+         send/2]).
 
 %% gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
@@ -29,6 +31,8 @@ start_link(Name, Mode) ->
 
 newMessage(Name, Message)->
     gen_server:cast(Name, {message, Message}).
+getMessages(Name, RegExp) ->
+    gen_server:call(Name, {getMessages, RegExp}).
 getMessages(Name, From, To) ->
     gen_server:call(Name, {getMessages, From, To}).
 send(Name, Messages)->
@@ -74,6 +78,9 @@ init([Name, Mode]) ->
 %%          {stop, Reason, Reply, State}   | (terminate/2 is called)
 %%          {stop, Reason, State}            (terminate/2 is called)
 %% --------------------------------------------------------------------
+handle_call({getMessages, RegExp}, _From, #state{archive_out = ETS} = State) ->
+    ToReturn = ets:select(ETS, RegExp),
+    {reply, ToReturn, State};
 handle_call({getMessages, From, To}, _From, #state{archive_out = ETS} = State) ->
     ToReturn = ets:select(ETS, [{'$1', 
                                  [{'and',
