@@ -5,6 +5,7 @@ rebar
 deps/*/
 */*/deps/*
 examples/quote*/rel/quote*/
+rel/fixTestErl/**
 .eunit/*
 .project
 .settings/*
