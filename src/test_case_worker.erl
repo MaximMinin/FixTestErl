@@ -108,7 +108,6 @@ handle_cast({send, Messages}, #state{callback = W, archive_out = A} = State) ->
 handle_cast({ini}, #state{callback = W, archive_out = A} = State) ->
     #worker{count_out = Count, name = C} = W,
     Messages = C:ini(),
-    io:format("INI: ~p ~p ~n", [C, Messages]), 
     NewCount = reply(Messages, Count, C, A),
     NewState = State#state{callback = W#worker{count_out = NewCount}},
     ets:insert(stateOfCallbacks, {C, W#worker{count_out = NewCount}}),
@@ -116,12 +115,11 @@ handle_cast({ini}, #state{callback = W, archive_out = A} = State) ->
 handle_cast({message, Msg}, #state{callback = W, archive_in = A,  archive_out = Ar} = State) ->
     #worker{count_in = I, count_out = Count, name = C} = W,
     ets:insert(A, {I+1, erlang:now(), Msg}),
-    case C:reply(Msg, I, Count) of
+    NewCount = case C:reply(Msg, I, Count) of
         ok ->
-            NewCount = Count,
-            ok;
+            Count;
         Messages ->
-            NewCount = reply(Messages, Count, C, Ar)
+            reply(Messages, Count, C, Ar)
     end,
     NewState = State#state{callback = W#worker{count_in = I+1, count_out = NewCount}},
     ets:insert(stateOfCallbacks, {C, W#worker{count_in = I+1, count_out = NewCount}}),
@@ -164,3 +162,19 @@ reply([M|Messages], Count, Callback, ETS) ->
 reply([], Count, _Callback, _ETS)->
     Count.
 
+getLastNelements(Tab, N) ->
+    getLastNelements(Tab, N, ets:last(Tab), []).
+
+getLastNelements(_Tab, _N, '$end_of_table', ToReturn)->
+   ToReturn;
+getLastNelements(_Tab, 0, _Key, ToReturn)->
+    ToReturn;
+getLastNelements(Tab, N, Key, ToReturn)->
+    [E] = ets:lookup(Tab, Key),
+    case ets:prev(Tab, Key) of
+        '$end_of_table' ->
+	   [E|ToReturn];
+	Key1 ->
+	    [E2] = ets:lookup(Tab, Key1),
+	    getLastNelements(Tab, N-1, Key1, [E2|[E|ToReturn]])
+    end.
