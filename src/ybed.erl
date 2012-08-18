@@ -9,11 +9,12 @@ run() ->
     GconfList = [
                  {id, Id}
                 ],
+    {ok, [{Ip,_,_}|_]} = inet:getif(),   
     Docroot = "../../www",
     SconfList = [
                  {port, 8888},
                  {servername, "fixTestErl"},
-                 {listen, {127,0,0,1}},
+                 {listen, Ip},
                  {docroot, Docroot},
                  {appmods, [
                             {"/sse", event_publisher}
