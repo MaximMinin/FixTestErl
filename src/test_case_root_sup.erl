@@ -21,7 +21,7 @@
 %% External functions
 %% ====================================================================
 start_link(Testcase, Mode, Ip, Port, FixVersion) ->
-    supervisor:start_link({local, ?MODULE}, ?MODULE, [Testcase, Mode, Ip, Port, FixVersion]).
+    supervisor:start_link(?MODULE, [Testcase, Mode, Ip, Port, FixVersion]).
 
 
 
@@ -38,7 +38,7 @@ init([Testcase, Mode, Ip, Port, FixVersion]) ->
     {ok,{{one_for_one,10,10}, [
                                 {
                                     test_archive_sup,
-                                    {test_archive_sup, start_link, []},
+                                    {test_archive_sup, start_link, [Testcase]},
                                     permanent, infinity, supervisor,
                                     [test_archive_sup]
                                 },

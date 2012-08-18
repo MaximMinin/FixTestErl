@@ -22,8 +22,12 @@ start_link() ->
 start_child(Callback) ->
     supervisor:start_child(?MODULE, [Callback, Callback:get_mod(), Callback:get_ip(), Callback:get_port(), Callback:get_fix_version()]).
 auto_start() ->
-   {ok, Callbacks} = application:get_env(fixTestErl, callbacks),
-   lists:map(fun(Callback) -> fixTestErl_sup:start_child(Callback) end, Callbacks).
+   case application:get_env(fixTestErl, callbacks) of
+       {ok, Callbacks} ->
+           lists:map(fun(Callback) -> fixTestErl_sup:start_child(Callback) end, Callbacks);
+       _Else ->
+           ok
+    end.
 
 
 %% ====================================================================
