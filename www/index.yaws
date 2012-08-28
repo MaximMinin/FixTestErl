@@ -42,7 +42,7 @@ out(A) ->
 <head>
 <frameset rows="60%, 40%">
   <frame src="mainwindow.yaws">
-  <frameset cols="20%, 80%">
+  <frameset cols="30%, 70%">
   <frame src="menu.yaws">
   <frame src="log.html">
   </frameset>

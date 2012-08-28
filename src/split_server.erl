@@ -10,7 +10,7 @@
 
 %% --------------------------------------------------------------------
 %% External exports
--export([start_link/2, newRowData/2, newReplyData/2, register/1]).
+-export([start_link/2, newRowData/2, newReplyData/2, register/1, unregister/1]).
 
 %% gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
@@ -44,6 +44,10 @@ newReplyData(Rec, Testcase) ->
     gen_server:cast(erlang:list_to_atom(lists:concat([splitt_, Testcase])), {reply, Rec}).
 register(Testcase) ->
     gen_server:cast(erlang:list_to_atom(lists:concat([splitt_, Testcase])), {register, self()}).
+unregister(Testcase) ->
+    gen_server:cast(erlang:list_to_atom(lists:concat([splitt_, Testcase])), {unregister, self()}).
+
+
     
 
 %% --------------------------------------------------------------------
@@ -68,6 +72,8 @@ handle_call(_Request, _From, State) ->
 %% --------------------------------------------------------------------
 handle_cast({register, Pid}, #state{web_logs=W}=State) ->
     {noreply, State#state{web_logs=[Pid|W]}};
+handle_cast({unregister, Pid}, #state{web_logs=W}=State) ->
+    {noreply, State#state{web_logs=lists:filter(fun(X) -> X =/= Pid end, W)}};
 handle_cast({reply, Rec}, #state{version = V, clientPid = C, web_logs = W} = State) ->
     lists:map(fun(Pid) -> Pid !{out, convertor:format(Rec, V)} end, W),
     tcp_server:send(C, convertor:convertRecordtoFix(Rec, V)),

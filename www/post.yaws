@@ -1,0 +1,13 @@
+<erl>
+
+out(A) ->
+    H=A#arg.headers,
+    C = H#headers.cookie,
+    L=yaws_api:find_cookie_val("foobar", C),
+    EventPublisher = erlang:list_to_atom(L),
+    [T|[]] = lists:sublist(binary:split(A#arg.clidata, <<"=">>), 2, 1),
+    TestCase = erlang:binary_to_atom(T, utf8),
+    event_publisher:register_test_case(EventPublisher, TestCase),
+{redirect, "/menu.yaws"}.
+
+</erl>

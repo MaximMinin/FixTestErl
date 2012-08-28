@@ -21,7 +21,7 @@
 %% External functions
 %% ====================================================================
 start_link(Testcase, Mode, Ip, Port, FixVersion) ->
-    supervisor:start_link(?MODULE, [Testcase, Mode, Ip, Port, FixVersion]).
+    supervisor:start_link({local, erlang:list_to_atom(lists:concat([sup_, Testcase]))},?MODULE, [Testcase, Mode, Ip, Port, FixVersion]).
 
 
 

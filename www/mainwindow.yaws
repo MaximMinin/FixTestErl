@@ -1,0 +1,30 @@
+
+<!DOCTYPE html
+PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+
+<head>
+ <title>FixTestErl</title>
+</head>
+
+<body>
+
+<div class="logo">
+   <img src="images/fixTestErl.jpg" width="250" alt="FixTestErl"/>
+</div>
+
+<div id="entry">
+<h3>Upload a test case file to the server</h3>
+
+<form enctype="multipart/form-data" method="post" action="upload.yaws"><input type="submit" value="Upload"></input><input type="file" width="50" name="foo"></input></form></div></html><div class="logo">
+
+</div>
+
+
+</body>
+</html>
+
+
+
