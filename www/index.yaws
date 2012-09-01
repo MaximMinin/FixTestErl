@@ -8,8 +8,6 @@ session(A, Visits) ->
             N = calendar:local_time(),
             From ! {self(), [N|Visits]},
             session(A, [N|Visits])
-    after 60000 -> %% keep state for 60 secs only
-            exit(normal)
     end.
 
 
@@ -42,10 +40,7 @@ out(A) ->
 <head>
 <frameset rows="60%, 40%">
   <frame src="mainwindow.yaws">
-  <frameset cols="30%, 70%">
-  <frame src="menu.yaws">
   <frame src="log.html">
-  </frameset>
 </frameset>
 </head>
 </html>

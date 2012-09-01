@@ -7,7 +7,7 @@
 %% --------------------------------------------------------------------
 %% External exports
 %% --------------------------------------------------------------------
--export([start_link/0, start_child/1, auto_start/0]).
+-export([start_link/0, start_child/1, stop_child/1, auto_start/0]).
 
 %% --------------------------------------------------------------------
 %% Internal exports
@@ -19,6 +19,10 @@
 %% ====================================================================
 start_link() ->
     supervisor:start_link({local, ?MODULE}, ?MODULE, []).
+stop_child(Callback) ->
+    Name = erlang:list_to_atom(lists:concat([sup_, Callback])),
+    Pid = erlang:whereis(Name),
+    supervisor:terminate_child(?MODULE, Pid).
 start_child(Callback) ->
     supervisor:start_child(?MODULE, [Callback, Callback:get_mod(), Callback:get_ip(), Callback:get_port(), Callback:get_fix_version()]).
 auto_start() ->

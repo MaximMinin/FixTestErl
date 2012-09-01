@@ -17,7 +17,9 @@ run() ->
                  {listen, Ip},
                  {docroot, Docroot},
                  {appmods, [
-                            {"/sse", event_publisher}
+                            {"/sse", event_publisher},
+                            {"/start/", fix_start},
+                            {"/stop/", fix_stop}
                            ]}
                 ],
     {ok, SCList, GC, ChildSpecs} =

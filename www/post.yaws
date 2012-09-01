@@ -8,6 +8,6 @@ out(A) ->
     [T|[]] = lists:sublist(binary:split(A#arg.clidata, <<"=">>), 2, 1),
     TestCase = erlang:binary_to_atom(T, utf8),
     event_publisher:register_test_case(EventPublisher, TestCase),
-{redirect, "/menu.yaws"}.
+{redirect, "/mainwindow.yaws"}.
 
 </erl>

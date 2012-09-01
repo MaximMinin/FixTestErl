@@ -8,21 +8,137 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
 <head>
  <title>FixTestErl</title>
 </head>
-
 <body>
-
+<table>
+  <colgroup>
+    <col width="800">
+    <col width="800" text-align="right">
+  </colgroup>
+<tr>
+<td>
+<a href="https://github.com/MaximMinin/FixTestErl" target="_blank">
 <div class="logo">
    <img src="images/fixTestErl.jpg" width="250" alt="FixTestErl"/>
 </div>
-
+</a>
+</td>
+<td style="text-align:left>
 <div id="entry">
 <h3>Upload a test case file to the server</h3>
 
-<form enctype="multipart/form-data" method="post" action="upload.yaws"><input type="submit" value="Upload"></input><input type="file" width="50" name="foo"></input></form></div></html><div class="logo">
-
+<form enctype="multipart/form-data" method="post" action="upload.yaws"><input type="submit" value="Upload"></input><input type="file" width="50" name="foo"></input></form>
 </div>
+</td>
+</tr>
+<tr>
+<td>
+<div>
+<erl>
+out(A) ->
+B = code:all_loaded(),
+L =  lists:map(fun({_,Name}) -> 
+  case Name of 
+    preloaded -> 
+              false; 
+    _Else ->  
+              C = string:words(Name, $/), 
+              M = string:sub_word(Name, C, $/), 
+              Module = string:sub_word(M, 1, $.), 
+              T = erlang:list_to_existing_atom(Module),  
+              case lists:keyfind([test_case_template], 2, T:module_info(attributes)) of
+                false -> false; 
+               _Other -> Module 
+              end 
+   end 
+end, B),
+AvTests = lists:filter(fun(X) -> X =/= false end, L),
+Testcases = lists:filter(fun(X) -> case X of {registered_name, _} -> true; _else -> false end end, lists:flatmap(fun(X) -> erlang:process_info(X) end, lists:map(fun({_,Pid,_,_}) -> Pid end, supervisor:which_children(fixTestErl_sup)))),
+RunTests = lists:map(fun({_, Name}) -> lists:sublist(erlang:atom_to_list(Name), 5, erlang:length(erlang:atom_to_list(Name))-4) end, Testcases),
+Tests = lists:subtract(AvTests, RunTests),
+StartButtons =  lists:map(fun(X) -> 
+[
+{form, [{method, "post"}, {action, "/start/"++X}], 
+       {input, [{type, "submit"}, {value, "start "++X}]}}, 
+{br} ]end, Tests),
 
+StopButtons =  lists:map(fun(X) -> 
+[
+{form, [{method, "post"}, {action, "/stop/"++X}], 
+       {input, [{type, "submit"}, {value, "stop "++X}]}}, 
+{br} ]end, RunTests),
 
+{ehtml,  lists:append([StartButtons, StopButtons])}.
+</erl>
+</div>
+<div>
+<form method="post" action="/post.yaws" >
+<erl>
+
+out(A) ->
+Testcases = lists:filter(fun(X) -> case X of {registered_name, _} -> true; _else -> false end end, lists:flatmap(fun(X) -> erlang:process_info(X) end, lists:map(fun({_,Pid,_,_}) -> Pid end, supervisor:which_children(fixTestErl_sup)))),
+Names = lists:map(fun({_, Name}) -> lists:sublist(erlang:atom_to_list(Name), 5, erlang:length(erlang:atom_to_list(Name))-4) end, Testcases),
+{ehtml, lists:append([[{h3, [{class, "foo"}],  "Available test cases"}], lists:map(fun(X) -> [{input, [{type, "radio"}, {name, "testcase"}, {value, X}]}, {nobr, [{class, "foo"}], X}, {br} ]end, Names),[{br}],[{input, [{type, "submit"}, {value, "SHOW LOG"}]}]]) }.
+
+</erl>
+</form>
+</div>
+</td>
+<td style="text-align:left">
+
+<div>
+<br>
+<erl>
+out(A) ->
+B = code:all_loaded(),
+L =  lists:map(fun({_,Name}) -> 
+  case Name of 
+    preloaded -> 
+              false; 
+    _Else ->  
+              C = string:words(Name, $/), 
+              M = string:sub_word(Name, C, $/), 
+              Module = string:sub_word(M, 1, $.), 
+              T = erlang:list_to_existing_atom(Module),  
+              case lists:keyfind([test_case_template], 2, T:module_info(attributes)) of
+                false -> false; 
+               _Other -> Module 
+              end 
+   end 
+end, B),
+AvTests = lists:filter(fun(X) -> X =/= false end, L),
+Header = {tr, [], [
+               {th, [], {p, [{class, "foo"}], "Name"}},
+               {th, [], {p, [{class, "foo"}], "Mode"}},
+               {th, [], {p, [{class, "foo"}], "Port"}},
+               {th, [], {p, [{class, "foo"}], "Fix version"}},
+               {th, [], {p, [{class, "foo"}], "Server"}}
+              ]},
+Rows = lists:map(fun(T) -> 
+           M = erlang:list_to_atom(T), 
+           {tr, [],
+               [
+                 {td, [], {p, [{class, "foo"}], T}},
+                 {td, [], {p, [{class, "foo"}], lists:concat(["", M:get_mod()])}}, 
+                 {td, [], {p, [{class, "foo"}], lists:concat(["", M:get_port()])}}, 
+                 {td, [], {p, [{class, "foo"}], M:get_fix_version()}},
+                 {td, [], {p, [{class, "foo"}], lists:concat(["", M:get_ip()])}}
+                ]
+           } 
+  end, 
+AvTests),
+
+TabT= {table, [{border, "1"}], [Header|Rows]},
+{ehtml, TabT}.
+</erl>
+</div>
+</tr>
+
+<tr>
+<td>
+<td>
+</tr>
+
+</tabel>
 </body>
 </html>
 

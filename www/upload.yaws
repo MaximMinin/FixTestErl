@@ -51,10 +51,14 @@ addFileChunk(_A, [], State) when State#upload.last==true,
                                  State#upload.fd /= undefined ->
 
     file:close(State#upload.fd),
-    io:format("Compile: ~p~n", [compile:file(?DIR ++ State#upload.filename, [{outdir,?DIR},verbose,report_errors])]),
+    Name = State#upload.filename,
+    Module = erlang:list_to_atom(string:sub_word(Name, 1, $.)),
+    C = compile:file(?DIR ++ Name, [{outdir,?DIR},verbose,report_errors]),
+    io:format("Compile: ~p~n", [C]),
+    code:load_file(Module),
     Res = {ehtml,
            {p,[], "File upload done"}},
-    {done, Res};
+    {done, {redirect, "/mainwindow.yaws"}};
 
 addFileChunk(A, [], State) when State#upload.last==true ->
     {done, err()};
@@ -72,6 +76,7 @@ addFileChunk(A, [{head, {_Name, Opts}}|Res], State ) ->
             %% file is a .yaws file !!!!!
             io:format("MAKE DIR ~p ~p", [?DIR, Fname]),
 	    file:make_dir(?DIR),
+            code:add_path(?DIR),
 	    case file:open([?DIR, Fname] ,[write]) of
 		{ok, Fd} ->
 		    S2 = State#upload{filename = Fname,
