@@ -19,7 +19,8 @@ run() ->
                  {appmods, [
                             {"/sse", event_publisher},
                             {"/start/", fix_start},
-                            {"/stop/", fix_stop}
+                            {"/stop/", fix_stop},
+                            {"/showLog/", fix_showlog}
                            ]}
                 ],
     {ok, SCList, GC, ChildSpecs} =
@@ -27,3 +28,5 @@ run() ->
     [supervisor:start_child(ybed_sup, Ch) || Ch <- ChildSpecs],
     yaws_api:setconf(GC, SCList),
     {ok, self()}.
+
+
