@@ -5,9 +5,6 @@
           filename,
           last}).
 
--define(DIR, "testcases/").
-
-
 out(A) when A#arg.state == undefined ->
     State = #upload{},
     multipart(A, State);
@@ -53,7 +50,8 @@ addFileChunk(_A, [], State) when State#upload.last==true,
     file:close(State#upload.fd),
     Name = State#upload.filename,
     Module = erlang:list_to_atom(string:sub_word(Name, 1, $.)),
-    C = compile:file(?DIR ++ Name, [{outdir,?DIR},verbose,report_errors]),
+    {ok, DIR} =  application:get_env(fixTestErl, test_cases_dir),
+    C = compile:file(DIR ++ Name, [{outdir,DIR},verbose,report_errors]),
     io:format("Compile: ~p~n", [C]),
     code:load_file(Module),
     Res = {ehtml,
@@ -74,10 +72,8 @@ addFileChunk(A, [{head, {_Name, Opts}}|Res], State ) ->
             %% we must not put the file in the
             %% docroot, it may execute uploade code if the
             %% file is a .yaws file !!!!!
-            io:format("MAKE DIR ~p ~p", [?DIR, Fname]),
-	    file:make_dir(?DIR),
-            code:add_path(?DIR),
-	    case file:open([?DIR, Fname] ,[write]) of
+            {ok, DIR} =  application:get_env(fixTestErl, test_cases_dir),
+  	    case file:open([DIR, Fname] ,[write]) of
 		{ok, Fd} ->
 		    S2 = State#upload{filename = Fname,
 				      fd = Fd},

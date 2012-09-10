@@ -67,35 +67,37 @@ Header = {tr, [], [
                {th, [], {p, [{class, "foo"}], "Fix version"}},
                {th, [], {p, [{class, "foo"}], "Server"}},
                {th, [], {p, [{class, "foo"}], "Start / Stop"}},
-               {th, [], {p, [{class, "foo"}], "Showlog"}}
+               {th, [], {p, [{class, "foo"}], "Showlog *"}}
               ]},
 Rows = lists:map(fun(T) -> 
            Start = case lists:member(T, RunningTests) of
                 false ->
-                   {td, [],
+                   {td, [{align, "center"}],
                   {form, [{method, "post"}, {action, "/start/"++T}], 
                   {input, [{type, "submit"}, {value, "start"}]}}
                    };
                 true ->
-                   {td, [],
+                   {td, [{align, "center"}],
                   {form, [{method, "post"}, {action, "/stop/"++T}], 
                   {input, [{type, "submit"}, {value, "stop"}]}}
                    }
            end,
            Log = case lists:member(T, RunningTests) of
                 true ->
-                   {td, [],
+                   {td, [{align, "center"}],
                   {form, [{method, "post"}, {action, "/showLog/"++T}], 
                   {input, [{type, "submit"}, {value, "showLog"}]}}
                    };
                 false ->
                    {td, [], {p, [{class, "foo"}], ""}}
            end,
-           M = erlang:list_to_atom(T), 
+           M = erlang:list_to_atom(T),
+           %%{ok, F} = file:read_file("/home/minin/git/FixTestErl/example/quote.erl"), 
            {tr, [],
                [
-                 {td, [], {p, [{class, "foo"}], T}},
-                 {td, [], {p, [{class, "foo"}], lists:concat(["", M:get_mod()])}}, 
+%%                 {td, [{title, erlang:binary_to_list(binary:replace(F, <<"\"">>, <<"|">>, [global]))}], {p, [{class, "foo"}], T}},
+                {td, [], {p, [{class, "foo"}], T}},
+                  {td, [], {p, [{class, "foo"}], lists:concat(["", M:get_mod()])}}, 
                  {td, [], {p, [{class, "foo"}], lists:concat(["", M:get_port()])}}, 
                  {td, [], {p, [{class, "foo"}], M:get_fix_version()}},
                  {td, [], {p, [{class, "foo"}], lists:concat(["", M:get_ip()])}},

@@ -7,7 +7,7 @@
 %%
 %% Include files
 %%
--include("../deps/fixTestErl/include/FIX_4_2.hrl").
+-include("../../../include/FIX_4_2.hrl").
 %%
 %% Exported Functions
 %%
