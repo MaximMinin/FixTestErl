@@ -14,7 +14,8 @@
 -export([start_link/4, send/2]).
 
 %% gen_server callbacks
--export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
+-export([init/1, handle_call/3, handle_cast/2, 
+         handle_info/2, terminate/2, code_change/3]).
 
 -record(state, {socket, test_case_name, mode}).
 
@@ -22,13 +23,16 @@
 %% External functions
 %% ====================================================================
 start_link(Testcase, Mode, Ip, Port) ->
-    gen_server:start_link({local, erlang:list_to_atom(lists:concat([tcp_, Testcase]))}, ?MODULE, [Testcase, Mode, Ip, Port], []).
+    gen_server:start_link({local, 
+        list_to_atom(lists:concat([tcp_, Testcase]))}, 
+        ?MODULE, [Testcase, Mode, Ip, Port], []).
 
 %% ====================================================================
 %% Server functions
 %% ====================================================================
 send(Testcase, Bin) ->
-    gen_server:cast(erlang:list_to_atom(lists:concat([tcp_, Testcase])), {send, Bin}).
+    gen_server:cast(list_to_atom(lists:concat([tcp_, Testcase])), 
+                    {send, Bin}).
 %% --------------------------------------------------------------------
 %% Function: init/1
 %% Description: Initiates the server
@@ -40,9 +44,15 @@ send(Testcase, Bin) ->
 init([Testcase, Mode, Ip, Port]) ->
     case Mode of
         server ->
-            {ok, Socket} = gen_tcp:listen(Port, [binary, {active, true}, {reuseaddr, true}]);
+            {ok, Socket} = gen_tcp:listen(Port, 
+                                          [binary, 
+                                            {active, true}, 
+                                            {reuseaddr, true}]);
         client ->
-            {ok, Socket} = gen_tcp:connect(Ip, Port, [binary, {active, true}, {reuseaddr, true}])
+            {ok, Socket} = gen_tcp:connect(Ip, Port, 
+                                           [binary, 
+                                            {active, true}, 
+                                            {reuseaddr, true}])
     end,
     gen_server:cast(self(), {init, Socket}),
     {ok, #state{test_case_name = Testcase, mode = Mode}}.
@@ -70,7 +80,8 @@ handle_call(_Request, _From, State) ->
 handle_cast({send, Bin}, #state{socket = Socket } = State) ->
     gen_tcp:send(Socket, Bin),
     {noreply, State};
-handle_cast({init, S}, #state{mode = Mode, test_case_name = T } = State) ->
+handle_cast({init, S}, 
+            #state{mode = Mode, test_case_name = T } = State) ->
     case Mode of
         server ->
             {ok, Socket} = gen_tcp:accept(S),

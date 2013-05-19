@@ -18,7 +18,8 @@
          send/2]).
 
 %% gen_server callbacks
--export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
+-export([init/1, handle_call/3, handle_cast/2, handle_info/2, 
+         terminate/2, code_change/3]).
 
 -record(worker, {name, count_in = 0, count_out = 0}).
 -record(state, {callback, mode}).
@@ -32,9 +33,11 @@ start_link(Name, Mode) ->
 newMessage(Name, Message)->
     gen_server:cast(Name, {message, Message}).
 getMessages(Name, RegExp) ->
-    gen_server:call(erlang:list_to_atom(lists:concat([archiv_, Name])), {getMessages, RegExp}).
+    gen_server:call(list_to_atom(lists:concat([archiv_, Name])),
+                                 {getMessages, RegExp}).
 getMessages(Name, From, To) ->
-    gen_server:call(erlang:list_to_atom(lists:concat([archiv_, Name])), {getMessages, From, To}).
+    gen_server:call(list_to_atom(lists:concat([archiv_, Name])),
+                                 {getMessages, From, To}).
 send(Name, Messages)->
     gen_server:cast(Name, {send, Messages}).
 
@@ -53,7 +56,8 @@ send(Name, Messages)->
 init([Name, Mode]) ->
     case ets:info(stateOfCallbacks) of
         undefined ->
-            ets:new(stateOfCallbacks, [ordered_set, public, named_table]);
+            ets:new(stateOfCallbacks, [ordered_set, 
+                                       public, named_table]);
         _Else ->
             ok
     end,
@@ -108,8 +112,10 @@ handle_cast({message, Msg}, #state{callback = W} = State) ->
         Messages ->
             reply(Messages, Count, C)
     end,
-    NewState = State#state{callback = W#worker{count_in = I+1, count_out = NewCount}},
-    ets:insert(stateOfCallbacks, {C, W#worker{count_in = I+1, count_out = NewCount}}),
+    NewState = State#state{callback = 
+                    W#worker{count_in = I+1, count_out = NewCount}},
+    ets:insert(stateOfCallbacks, 
+                {C, W#worker{count_in = I+1, count_out = NewCount}}),
     {noreply, NewState}.
 
 %% --------------------------------------------------------------------
@@ -144,7 +150,8 @@ code_change(_OldVsn, State, _Extra) ->
 %% --------------------------------------------------------------------
 reply([M|Messages], Count, Callback) ->
     split_server:newReplyData(M, Callback), 
-    test_archive_worker:insert(Callback, {out, {Count+1, erlang:now(), M}}),
+    test_archive_worker:insert(Callback, 
+                               {out, {Count+1, erlang:now(), M}}),
     reply(Messages, Count+1, Callback);
 reply([], Count, _Callback)->
     Count.

@@ -59,7 +59,7 @@ handle_cast(_Msg, State) ->
     {noreply, State}.
 
 handle_info({ok, YawsPid},#state{sock=S}= State) ->
-   sendData(S, [{"","Select test case on the link side"}], State#state{yaws_pid=YawsPid});
+   sendData(S, [{"","Select test case to show log"}], State#state{yaws_pid=YawsPid});
 handle_info({discard, _YawsPid}, State) ->
     %% nothing to do
      io:format("discard ~n"),

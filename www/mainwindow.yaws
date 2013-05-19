@@ -92,11 +92,12 @@ Rows = lists:map(fun(T) ->
                    {td, [], {p, [{class, "foo"}], ""}}
            end,
            M = erlang:list_to_atom(T),
-           %%{ok, F} = file:read_file("/home/minin/git/FixTestErl/example/quote.erl"), 
+           {ok, DIR} =  application:get_env(fixTestErl, test_cases_dir),
+           {ok, F} = file:read_file(DIR ++ T ++ ".erl"), 
            {tr, [],
                [
-%%                 {td, [{title, erlang:binary_to_list(binary:replace(F, <<"\"">>, <<"|">>, [global]))}], {p, [{class, "foo"}], T}},
-                {td, [], {p, [{class, "foo"}], T}},
+                 {td, [{title, erlang:binary_to_list(binary:replace(F, <<"\"">>, <<"|">>, [global]))}], {p, [{class, "foo"}], T}},
+%%                {td, [], {p, [{class, "foo"}], T}},
                   {td, [], {p, [{class, "foo"}], lists:concat(["", M:get_mod()])}}, 
                  {td, [], {p, [{class, "foo"}], lists:concat(["", M:get_port()])}}, 
                  {td, [], {p, [{class, "foo"}], M:get_fix_version()}},

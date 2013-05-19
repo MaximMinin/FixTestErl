@@ -35,14 +35,16 @@
 %% ====================================================================
 
 %% Helper macro for declaring children of supervisor
--define(CHILD(I, Type, Arg), {I, {I, start_link, Arg}, permanent, 5000, Type, [I]}).
+-define(CHILD(I, Type, Arg), {I, {I, start_link, Arg}, 
+                              permanent, 5000, Type, [I]}).
 
 %% ===================================================================
 %% API functions
 %% ===================================================================
 
 start_link(Testcase, Mode, Ip, Port, FixVersion) ->
-    supervisor:start_link(?MODULE, [Testcase, Mode, Ip, Port, FixVersion]).
+    supervisor:start_link(?MODULE, 
+        [Testcase, Mode, Ip, Port, FixVersion]).
 
 %% ===================================================================
 %% Supervisor callbacks
@@ -54,8 +56,8 @@ start_link(Testcase, Mode, Ip, Port, FixVersion) ->
 %%          {error, Reason}
 %% --------------------------------------------------------------------
 init([Testcase, Mode, Ip, Port, FixVersion]) ->
-    {ok, { {one_for_all, 5, 10}, [
-                                  ?CHILD(tcp_server, worker, [Testcase, Mode, Ip, Port]),
-                                  ?CHILD(split_server, worker, [Testcase, FixVersion]),
-                                  ?CHILD(test_case_worker, worker, [Testcase, Mode])
-                                  ]} }.
+    {ok, { {one_for_all, 5, 10}, 
+        [?CHILD(tcp_server, worker, [Testcase, Mode, Ip, Port]),
+         ?CHILD(split_server, worker, [Testcase, FixVersion]),
+         ?CHILD(test_case_worker, worker, [Testcase, Mode])
+        ]} }.

@@ -10,10 +10,12 @@
 
 %% --------------------------------------------------------------------
 %% External exports
--export([start_link/2, newRowData/2, newReplyData/2, register/1, unregister/1]).
+-export([start_link/2, newRowData/2, 
+         newReplyData/2, register/1, unregister/1]).
 
 %% gen_server callbacks
--export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
+-export([init/1, handle_call/3, handle_cast/2, handle_info/2, 
+         terminate/2, code_change/3]).
 
 -record(state, {last = <<>>, clientPid, version, web_logs = []}).
 
@@ -21,7 +23,10 @@
 %% External functions
 %% ====================================================================
 start_link(Testcase, FixVersion)->
-    gen_server:start_link({local, erlang:list_to_atom(lists:concat([splitt_, Testcase]))}, ?MODULE, [Testcase, FixVersion], []).
+    gen_server:start_link({local, 
+                           list_to_atom(lists:concat([splitt_, 
+                                                      Testcase]))}, 
+                           ?MODULE, [Testcase, FixVersion], []).
 
 %% ====================================================================
 %% Server functions
@@ -39,16 +44,17 @@ init([Client, FixVersion]) ->
     {ok, #state{clientPid = Client, version = FixVersion}}.
 
 newRowData(Data, Testcase) ->
-    gen_server:cast(erlang:list_to_atom(lists:concat([splitt_, Testcase])), {new, Data}).
+    gen_server:cast(list_to_atom(lists:concat([splitt_, Testcase])),
+                    {new, Data}).
 newReplyData(Rec, Testcase) ->
-    gen_server:cast(erlang:list_to_atom(lists:concat([splitt_, Testcase])), {reply, Rec}).
+    gen_server:cast(list_to_atom(lists:concat([splitt_, Testcase])),
+                    {reply, Rec}).
 register(Testcase) ->
-    gen_server:cast(erlang:list_to_atom(lists:concat([splitt_, Testcase])), {register, self()}).
+    gen_server:cast(list_to_atom(lists:concat([splitt_, Testcase])), 
+                    {register, self()}).
 unregister(Testcase) ->
-    gen_server:cast(erlang:list_to_atom(lists:concat([splitt_, Testcase])), {unregister, self()}).
-
-
-    
+    gen_server:cast(list_to_atom(lists:concat([splitt_, Testcase])), 
+                    {unregister, self()}).
 
 %% --------------------------------------------------------------------
 %% Function: handle_call/3
@@ -73,17 +79,22 @@ handle_call(_Request, _From, State) ->
 handle_cast({register, Pid}, #state{web_logs=W}=State) ->
     {noreply, State#state{web_logs=[Pid|W]}};
 handle_cast({unregister, Pid}, #state{web_logs=W}=State) ->
-    {noreply, State#state{web_logs=lists:filter(fun(X) -> X =/= Pid end, W)}};
-handle_cast({reply, Rec}, #state{version = V, clientPid = C, web_logs = W} = State) ->
+    {noreply, 
+     State#state{web_logs=lists:filter(fun(X) -> X =/= Pid end, W)}};
+handle_cast({reply, Rec}, 
+        #state{version = V, clientPid = C, web_logs = W} = State) ->
     lists:map(fun(Pid) -> Pid !{out, convertor:format(Rec, V)} end, W),
-    tcp_server:send(C, convertor:convertRecordtoFix(Rec, V)),
+    tcp_server:send(C, convertor:convertRecordToFix(Rec, V)),
     {noreply, State};
-handle_cast({new, Data}, #state{last = Last, clientPid = ClientPid, version = V, web_logs = W} = State) ->
+handle_cast({new, Data}, 
+        #state{last = Last, clientPid = ClientPid, 
+               version = V, web_logs = W} = State) ->
     {Broken, Messages} = split(binary:list_to_bin([Last, Data])),
     lists:map(fun(M) ->
               Reg = convertor:convertFixToRecord(M, V), 
               test_case_worker:newMessage(ClientPid, Reg),
-              lists:map(fun(Pid) -> Pid ! {in, convertor:format(Reg, V)} end, W)
+              lists:map(fun(Pid) -> 
+                  Pid ! {in, convertor:format(Reg, V)} end, W)
               end, Messages),
     {noreply, State#state{last = Broken}}.
 
@@ -125,8 +136,12 @@ split([E|[]], Last, ToReturn) ->
         [<<>>] ->
             {Last, ToReturn};
         [Int|Rest] ->
-             {binary:list_to_bin(Rest), [binary:list_to_bin([Last, <<"10=">>, Int, <<1>>])|ToReturn]}
+             {binary:list_to_bin(Rest), 
+             [binary:list_to_bin([Last, 
+                                  <<"10=">>, Int, <<1>>])|ToReturn]}
     end;
 split([E|Liste], Last, ToReturn) ->
     [Int|Rest] =  binary:split(E, <<1>>), 
-    split(Liste, Rest, [binary:list_to_bin([Last, <<"10=">>, Int, <<1>>])|ToReturn]). 
+    split(Liste, Rest, 
+          [binary:list_to_bin([Last, 
+                               <<"10=">>, Int, <<1>>])|ToReturn]). 
