@@ -7,7 +7,7 @@
 %%
 %% Include files
 %%
--include("../../../include/FIX_4_2.hrl").
+-include_lib("fixUtils/include/FIX_4_2.hrl").
 %%
 %% Exported Functions
 %%
@@ -76,7 +76,7 @@ test_case_worker:send(?MODULE, [#quoteRequest{standardHeader = #standardHeader{b
                                                                                msgSeqNum = Number,
                                                                                sendingTime = helper:getNow()},
                                   quoteReqID = helper:getIniq(),
-                                  repeatingReg_quoteRequest_146 = [#repeatingReg_quoteRequest_146{symbol = <<"TEST">>,
+                                  rgr_quoteRequest_146 = [#rgr_quoteRequest_146{symbol = <<"TEST">>,
                                                                                    securityID = <<"TEST">>}],
                                                  standardTrailer = #standardTrailer{checkSum = auto}
                                                  }

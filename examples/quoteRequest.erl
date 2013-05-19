@@ -6,7 +6,7 @@
 %%
 %% Include files
 %%
--include("../../../include/FIX_4_2.hrl").
+-include_lib("fixUtils/include/FIX_4_2.hrl").
 %%
 %% Exported Functions
 %%
@@ -77,7 +77,7 @@ reply_local(#logout{}, _In, _Out) ->
 %% "55=DE0007093353",1,"48=DE0007093353",1,"22=4",1,"132=5.31",1,"133=5.33",1,
 %% "134=1000",1,"135=1000",1,"62=20120529-14:45:59",1,"10=219",1>>.
 reply_local(#quoteRequest{quoteReqID = QuoteReqID, 
-                    repeatingReg_quoteRequest_146 = [#repeatingReg_quoteRequest_146{symbol = Isin,
+                    rgr_quoteRequest_146 = [#rgr_quoteRequest_146{symbol = Isin,
                                                                                    securityID = Wkn}]}, 
       SeqNumIn, _SeqNumOut)->
     [#quote{
