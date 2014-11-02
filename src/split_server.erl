@@ -83,18 +83,18 @@ handle_cast({unregister, Pid}, #state{web_logs=W}=State) ->
      State#state{web_logs=lists:filter(fun(X) -> X =/= Pid end, W)}};
 handle_cast({reply, Rec}, 
         #state{version = V, clientPid = C, web_logs = W} = State) ->
-    lists:map(fun(Pid) -> Pid !{out, convertor:format(Rec, V)} end, W),
-    tcp_server:send(C, convertor:convertRecordToFix(Rec, V)),
+    lists:map(fun(Pid) -> Pid !{out, fix_convertor:format(Rec, V)} end, W),
+    tcp_server:send(C, fix_convertor:record2fix(Rec, V)),
     {noreply, State};
 handle_cast({new, Data}, 
         #state{last = Last, clientPid = ClientPid, 
                version = V, web_logs = W} = State) ->
     {Broken, Messages} = split(binary:list_to_bin([Last, Data])),
     lists:map(fun(M) ->
-              Reg = convertor:convertFixToRecord(M, V), 
+              Reg = fix_convertor:fix2record(M, V), 
               test_case_worker:newMessage(ClientPid, Reg),
               lists:map(fun(Pid) -> 
-                  Pid ! {in, convertor:format(Reg, V)} end, W)
+                  Pid ! {in, fix_convertor:format(Reg, V)} end, W)
               end, Messages),
     {noreply, State#state{last = Broken}}.
 

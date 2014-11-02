@@ -7,7 +7,7 @@
 %%
 %% Include files
 %%
--include_lib("fixUtils/include/FIX_4_2.hrl").
+-include_lib("fix_convertor/include/FIX_4_2.hrl").
 %%
 %% Exported Functions
 %%
@@ -21,7 +21,7 @@ get_mod() ->
 get_port() ->
     12345.
 get_fix_version() ->
-    "FIX_4_2".
+    'FIX 4.2'.
 get_ip() ->
     localhost.
 
