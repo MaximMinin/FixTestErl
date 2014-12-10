@@ -13,23 +13,36 @@
 
 %% --------------------------------------------------------------------
 %% External exports
--export([start_link/1, insert/2]).
+-export([start_link/2, insert/2,
+         subscribe/1,
+         getMessages/2, getMessages/3]).
 
 %% gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
 
--record(state, {in ,out}).
+-record(state, {in ,out, clients = [], fix_version}).
 
 %% ====================================================================
 %% External functions
 %% ====================================================================
-start_link(Testcase)->
-    gen_server:start_link({local, erlang:list_to_atom(lists:concat([archiv_, Testcase]))}, ?MODULE, [Testcase], []).
+start_link(Testcase, FixVersion)->
+    gen_server:start_link({local,
+                           erlang:list_to_atom(lists:concat([archiv_, Testcase]))},
+                          ?MODULE, [Testcase, FixVersion], []).
 
 insert(Testcase, Rec) ->
     gen_server:cast(erlang:list_to_atom(lists:concat([archiv_, Testcase])), Rec).
 
+getMessages(Name, RegExp) ->
+    gen_server:call(list_to_atom(lists:concat([archiv_, Name])),
+                                 {getMessages, RegExp}).
+getMessages(Name, From, To) ->
+    gen_server:call(list_to_atom(lists:concat([archiv_, Name])),
+                                 {getMessages, From, To}).
 
+subscribe(Name) ->
+    gen_server:call(list_to_atom(lists:concat([archiv_, Name])),
+                                 subscribe).
 %% ====================================================================
 %% Server functions
 %% ====================================================================
@@ -42,7 +55,7 @@ insert(Testcase, Rec) ->
 %%          ignore               |
 %%          {stop, Reason}
 %% --------------------------------------------------------------------
-init([Name]) ->
+init([Name, FixVersion]) ->
     InT = ets:new(erlang:list_to_atom(lists:concat([in_, Name])), [ordered_set ]),
     OutT = ets:new(erlang:list_to_atom(lists:concat([out_, Name])), [ordered_set ]),
     case ets:info(stateOfCallbacks) of
@@ -51,7 +64,7 @@ init([Name]) ->
         _Else ->
             ok
     end,
-    {ok, #state{in = InT, out = OutT}}.
+    {ok, #state{in = InT, out = OutT, fix_version = FixVersion}}.
 
 %% --------------------------------------------------------------------
 %% Function: handle_call/3
@@ -63,6 +76,10 @@ init([Name]) ->
 %%          {stop, Reason, Reply, State}   | (terminate/2 is called)
 %%          {stop, Reason, State}            (terminate/2 is called)
 %% --------------------------------------------------------------------
+handle_call(subscribe, {Pid, _}, State) ->
+    Ref = erlang:monitor(process, Pid),
+    {reply, <<"ok">>,
+     State#state{clients = [{Ref, Pid}|State#state.clients]}};
 handle_call({getMessages, RegExp}, _From, #state{out = ETS} = State) ->
     ToReturn = ets:select(ETS, RegExp),
     {reply, ToReturn, State};
@@ -86,9 +103,23 @@ handle_call(_Request, _From, State) ->
 %%          {stop, Reason, State}            (terminate/2 is called)
 %% --------------------------------------------------------------------
 handle_cast({in, Rec}, #state{in = ETS} = State) ->
+%%     M = erlang:list_to_bitstring(lists:concat(erlang:tuple_to_list(Rec))),
+%%     M = erlang:list_to_bitstring(lists:flatten(io_lib:format("~p", [Rec]))),
+    {_,_,{R,_}} = Rec,
+    M = erlang:list_to_bitstring("<- " ++ fix_convertor:format(R, State#state.fix_version)),
+    lists:map(fun({_,Pid}) -> 
+                      yaws_api:websocket_send(Pid, {text, M})
+                      end,
+              State#state.clients),
     ets:insert(ETS, Rec),
     {noreply, State};
 handle_cast({out, Rec}, #state{out = ETS} = State) ->
+    {_,_,R} = Rec,
+    M = erlang:list_to_bitstring("-> " ++fix_convertor:format(R, State#state.fix_version)),
+    lists:map(fun({_,Pid}) -> 
+                      yaws_api:websocket_send(Pid, {text, M})
+                      end,
+              State#state.clients),
     ets:insert(ETS, Rec),
     {noreply, State};
 handle_cast(_Msg, State) ->
@@ -101,6 +132,9 @@ handle_cast(_Msg, State) ->
 %%          {noreply, State, Timeout} |
 %%          {stop, Reason, State}            (terminate/2 is called)
 %% --------------------------------------------------------------------
+handle_info({'DOWN', Ref, _Type, Pid, _Info}, State) ->
+    Clients = lists:delete({Ref, Pid}, State#state.clients),
+    {noreply, State#state{clients = Clients}};
 handle_info(_Info, State) ->
     {noreply, State}.
 

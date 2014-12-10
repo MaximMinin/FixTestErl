@@ -10,3 +10,6 @@ rel/fixTestErl/**
 .project
 .settings/*
 .externalToolBuilders/*
+/ebin/
+/deps/
+/.settings/

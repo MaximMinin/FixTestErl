@@ -14,7 +14,7 @@
 %% --------------------------------------------------------------------
 %% External exports
 %% --------------------------------------------------------------------
--export([start_link/1]).
+-export([start_link/2]).
 
 %% --------------------------------------------------------------------
 %% Internal exports
@@ -25,8 +25,8 @@
 %% External functions
 %% ====================================================================
 
-start_link(Testcase) ->
-    supervisor:start_link(?MODULE, [Testcase]).
+start_link(Testcase, FixVersion) ->
+    supervisor:start_link(?MODULE, [Testcase, FixVersion]).
 
 
 %% ====================================================================
@@ -38,7 +38,9 @@ start_link(Testcase) ->
 %%          ignore                          |
 %%          {error, Reason}
 %% --------------------------------------------------------------------
-init([Testcase]) ->
-    Child = {test_archive_worker,{test_archive_worker, start_link,[Testcase]},
+init([Testcase, FixVersion]) ->
+    Child = {test_archive_worker,{test_archive_worker,
+                                  start_link,
+                                  [Testcase, FixVersion]},
 	      permanent,2000,worker,[test_archive_worker]},
     {ok,{{one_for_all,10,10}, [Child]}}.

@@ -1,0 +1,31 @@
+<head>
+<script type="text/javascript">
+function toggle(control){
+    var elem = document.getElementById(control);
+     
+    if(elem.style.display == "none"){
+        elem.style.display = "block";
+    }else{
+        elem.style.display = "none";
+    }
+}
+</script>
+
+</head>
+
+<body>
+   
+   <a href="javascript:toggle('tags_check')"> x Zum aufklappen hier klicken. (1)</a>
+   <div id="tags_check" style="display: none">
+      <input type="checkbox" name="col" value="summary" checked="checked" /> Name1
+      <input type="checkbox" name="col" value="summary" checked="checked" /> Name2
+   </div>
+   <br><br>
+   <a href="javascript:toggle('tags_check1')"> x Zum aufklappen hier klicken. (2)</a>
+   <div id="tags_check" style="display: none">
+      <input type="checkbox" name="col" value="summary" checked="checked" /> Name1
+      <input type="checkbox" name="col" value="summary" checked="checked" /> Name2
+   </div>
+   <br>
+   
+</body>

@@ -1,0 +1,33 @@
+<erl>
+    out(A) ->
+        case A#arg.clidata of
+            {partial, B} ->
+                case A#arg.state of
+                    undefined ->
+                        {get_more, undefined, B};
+                    OldB ->
+                        {get_more, undefined, erlang:iolist_to_binary([OldB, B])}
+                 end;    
+            _Else ->
+                A2 = case A#arg.state of
+                        undefined -> A;
+                        B -> A#arg{clidata = erlang:iolist_to_binary([B, A#arg.clidata])}
+                     end,   
+                L = yaws_api:parse_post(A2),
+                L1 = lists:filter(fun({_,X}) -> X /= [] end, L),
+                io:format("FORM: ~p~n", [L1]),
+                case fte_testcase_creator:create_testcase_file(L1) of
+                    {Name, F} ->
+                        {ok, DIR} =  application:get_env(fixTestErl, test_cases_dir), 
+                        FileName = DIR++Name++".erl",
+                        file:write_file(FileName, io_lib:fwrite("~s", [lists:flatten(F)])),
+                        C = compile:file(FileName, [{outdir,DIR},verbose,report_errors]),
+                        io:format("Compile: ~p~n", [C]),
+                        code:load_file(erlang:list_to_atom(Name)),
+                        Res = {ehtml,
+                            {p,[], "File upload done"}},
+                        {redirect, "/mainwindow.yaws"};
+                    _Else -> ok
+        end end.
+
+</erl>

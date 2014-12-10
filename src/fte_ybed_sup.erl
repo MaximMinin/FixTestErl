@@ -1,4 +1,4 @@
--module(ybed_sup).
+-module(fte_ybed_sup).
 -behaviour(supervisor).
 
 %% API

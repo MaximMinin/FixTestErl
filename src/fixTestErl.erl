@@ -1,6 +1,6 @@
 %% Author: Maxim Minin
 %% Created: 03.06.2012
-%% Description: TODO: Add description to helper
+%% Description: TODO: Add description to fixTestErl
 -module(fixTestErl).
 
 -behaviour(application).

@@ -43,10 +43,10 @@ init([]) ->
                                     [fixTestErl_sup]
                                 },
                                 {
-                                    ybed_sup,
-                                    {ybed_sup, start_link, []},
+                                    fte_ybed_sup,
+                                    {fte_ybed_sup, start_link, []},
                                     permanent, infinity, supervisor,
-                                    [ybed_sup]
+                                    [fte_ybed_sup]
                                 }
                               ]}}.
 

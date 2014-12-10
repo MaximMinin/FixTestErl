@@ -1,0 +1,110 @@
+<html>
+<head>
+    <title>FixTestErl</title>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js" type="text/javascript">
+    </script>
+<script type="text/javascript">
+
+var counter = 0;
+
+function moreFields() {
+    if(counter > 0){
+        var f =  document.getElementById("outcoming message" + counter);
+        if (f != null){
+            var selectedRecord = f.value;
+            var reply = document.getElementById(selectedRecord + counter);
+            reply.style.display = 'block';
+            var fields = reply.childNodes;
+        }
+    }
+
+    counter++;
+    var newFields = document.getElementById('readroot').cloneNode(true);
+    newFields.id = '';
+    newFields.style.display = 'block';
+    var newField = newFields.childNodes;
+    for (var i=0;i<newField.length;i++) {
+        var theName = newField[i].name
+        if (theName)
+            newField[i].name = theName + counter;
+            newField[i].id = theName + counter;
+    }
+    var insertHere = document.getElementById('writeroot');
+    insertHere.parentNode.insertBefore(newFields,insertHere);
+}
+
+window.onload = moreFields;
+
+function init() {
+    document.getElementById('moreFields').onclick = moreFields;
+    moreFields();
+}
+
+</script>
+</head>
+
+<body>
+    <a href="https://github.com/MaximMinin/FixTestErl" target="_blank">
+	    <div class="logo">
+	       <img src="images/fixTestErl.jpg" width="250" alt="FixTestErl" align="right"/>
+	    </div>
+    </a>
+
+	<form action="/create_test_case_post_form.yaws" method="post" onsubmit="return check();">
+	
+    <erl>
+        out(A) ->
+                    [Name, Mode, Port, Host, Version] = string:tokens(A#arg.querydata, "|"),
+                    yaws_api:setcookie("new_test_case", A#arg.querydata, "/create_test_case_post_form.yaws"),
+                    FixVersion = re:replace(Version, "%20", " ", [global, {return, list}]),
+                    {html, "<input name=\"name\" type=\"hidden\" value=\""++Name++"\">"
+                            "<input name=\"mode\" type=\"hidden\" value=\""++Mode++"\">"
+                            "<input name=\"port\" type=\"hidden\" value=\""++Port++"\">"
+                            "<input name=\"host\" type=\"hidden\" value=\""++Host++"\">"
+                            "<input name=\"version\" type=\"hidden\" value=\""++FixVersion++"\">"}.
+    </erl>
+	<div id="readroot" style="display: none">
+        <input value="Remove reply" onclick="this.parentNode.parentNode.removeChild(this.parentNode);" type="button"><br><br>
+        <select name="incoming message">
+            <erl>
+                out(A) ->
+                    [Name, Mode, Port, Host, Version] = string:tokens(A#arg.querydata, "|"),
+                    FixVersion = re:replace(Version, "%20", " ", [global, {return, list}]),
+                    {ehtml, [{option, [],X} || X <- fte_testcase_creator:get_records_names(FixVersion)]}.
+              </erl>
+        </select><br><br>
+        <select name="outcoming message">
+            <erl>
+                out(A) ->
+                    [Name, Mode, Port, Host, Version] = string:tokens(A#arg.querydata, "|"),
+                    FixVersion = re:replace(Version, "%20", " ", [global, {return, list}]),
+                    Rs = fte_testcase_creator:get_records_names(FixVersion),
+                    C = [{option, [{value, X}],X} || X <- Rs],
+                    {ehtml, C}.
+              </erl>
+        </select><br><br>
+            <erl>
+                out(A) ->
+                    [Name, Mode, Port, Host, Version] = string:tokens(A#arg.querydata, "|"),
+                    FixVersion = re:replace(Version, "%20", " ", [global, {return, list}]),
+                    Rs = fte_testcase_creator:get_records_names(FixVersion),
+                    Fields =  lists:map(fun(Record) -> 
+                                    fte_testcase_creator:get_records_fields(FixVersion, Record)  
+                              end, Rs),
+                    {ehtml, Fields}.
+              </erl>
+                      
+        <br><br>
+    </div>
+    <span id="writeroot"></span>
+    <input value="Define reply" type="button" onclick="moreFields()">
+    
+    
+	<br /><br />
+	<input name="next" type="submit" value="finish">
+	
+	</form>
+	
+	
+</body>
+</html>

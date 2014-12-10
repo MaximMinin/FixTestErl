@@ -1,0 +1,105 @@
+<html>
+<head>
+    <title>FixTestErl</title>
+    <link rel="stylesheet" href="jquery-ui-custom/jquery-ui.min.css">
+    <script src="jquery-ui-custom/external/jquery/jquery.js"></script>
+    <script src="jquery-ui-custom/jquery-ui.min.js"></script>
+    <script type="text/javascript">
+		function check(){
+		   var f = document.forms[0];
+		   var error = "";  
+		   if (f.name.value == "") {
+		      error += "Name\n";
+		   }
+		
+		   if (f.port.value == "") {
+		      error += "Port\n";
+		   }
+		
+		   if (f.mode[1].checked && f.host.value == "") {
+		      error += "Host by mode client";
+		   }
+		    
+		   if (error != "") {
+		      var errortext = "mandatory fields:\n";
+		      errortext += error;
+		      alert(errortext);
+		      return false;
+		   }
+		   var mode = "";
+		   var host = "";
+		   if(f.mode[1].checked){
+		    mode = "client";
+		    host=f.host.value;
+		   }else{
+		    mode = "server";
+		    if(f.host.value == ""){
+		        host = "localhost";
+		    }else{
+		        host = f.host.value;  
+		    }
+		   }
+		   URL='/create_test_case_form2.yaws?'+f.name.value+"|"+mode+"|"+f.port.value+"|"+host+"|"+f.version.value;
+		   window.location=URL;
+		}
+</script>
+
+</head>
+
+<body>
+    <a href="https://github.com/MaximMinin/FixTestErl" target="_blank">
+	    <div class="logo">
+	       <img src="images/fixTestErl.jpg" width="250" alt="FixTestErl" align="right"/>
+	    </div>
+    </a>
+
+	<form>
+	<p>Name</p>
+	<input name="name" type="text">
+	<p>Port</p>
+	<input name="port" type="text" id="port">	
+	<p>Mode:<br>
+		<input name="mode" value="server" type="Radio" id="server"> server
+		<input name="mode" value="client" checked="checked" type="Radio" id="client"> client
+	</p>
+		<div id="host">
+	<p>Host</p>
+	<input name="host" type="text">
+	</div>
+	<p>Fix Version</p>
+	<select name="version" size="">
+		<option>FIX 4.0</option>
+        <option>FIX 4.1</option> 
+        <option>FIX 4.2</option>
+        <option>FIX 4.3</option> 
+        <option>FIX 4.4</option>
+        <option>FIX 5.0</option> 
+        <option>FIX 5.0 SP 1</option>
+        <option>FIX 5.0 SP 2</option>
+	</select><br><br>
+	
+	<br /><br />
+	
+	<input  onclick="check();" type="button" value="next">
+	</form>
+	
+	<script src="jquery-ui-custom/external/jquery/jquery.js"></script>
+	<script src="jquery-ui-custom/jquery-ui.js"></script>
+	<script>
+    	$( "#server" ).click(
+    			function(){
+    				$( "#host" ).hide();
+    			});
+    	$( "#client" ).click(
+    			function(){
+    				$( "#host" ).show();
+    			});
+    	$( "#port" ).keyup(
+    			function(){
+    				this.value=this.value.replace(/[^\d]/g,'');
+    			});
+    	
+     </script>
+
+</body>
+</html>

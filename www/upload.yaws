@@ -1,110 +1,139 @@
-<erl>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="Maxim Minin">
+    <link rel="icon" href="../images/fixTestErl.jpg">
 
--record(upload, {
-          fd,
-          filename,
-          last}).
+    <title>Upload FixTestErl</title>
 
-out(A) when A#arg.state == undefined ->
-    State = #upload{},
-    multipart(A, State);
-out(A) ->
-    multipart(A, A#arg.state).
+    <!-- Bootstrap core CSS -->
+    <link href="dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap theme -->
+    <link href="dist/css/bootstrap-theme.min.css" rel="stylesheet">
 
+    <!-- Custom styles for this template -->
+    <link href="theme.css" rel="stylesheet">
+  </head>
 
+  <body role="document">
 
-err() ->
-    {ehtml,
-     {p, [], "error"}}.
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="https://github.com/MaximMinin/FixTestErl">[Fix || Test <- Erl]</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li><a href="index.yaws">Home</a></li>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Player <span class="caret"></span></a>
+              <ul class="dropdown-menu" role="menu">
+                <li><a href="scenarios.yaws">Scenarios</a></li>
+                <li><a href="records.yaws">Records</a></li>
+              </ul>
+            </li>
+            <li class="active" class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Recorder <span class="caret"></span></a>
+              <ul class="dropdown-menu" role="menu">
+                <li class="active"><a href="upload.yaws">Upload</a></li>
+                <li><a href="generate.yaws">Generate</a></li>
+                <li><a href="record.yaws">Record</a></li>
+              </ul>
+            </li>
+            <li><a href="viewer.yaws">Viewer</a></li>
+            <li><a href="help.yaws">Help</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
 
-multipart(A, State) ->
-    Parse = yaws_api:parse_multipart_post(A),
-    case Parse of
-        {cont, Cont, Res} ->
-            case addFileChunk(A, Res, State) of
-                {done, Result} ->
-                    Result;
-                {cont, NewState} ->
-                    {get_more, Cont, NewState}
-            end;
-        {result, Res} ->
-            case addFileChunk(A, Res, State#upload{last=true}) of
-                {done, Result} ->
-                    Result;
-                {cont, _} ->
-                    err()
-            end;
-        {error, _Reason} ->
-            err()
-    end.
+    <div class="container theme-showcase" role="main">
 
+      <!-- Main jumbotron for a primary marketing message or call to action -->
+      <div class="jumbotron">
+        <p>
+        	You can upload scenarios here.
+        	Scenario is an erlang module, that implements the behaviour <em>"test_case_template"</em>.
+        	You can also upload some utils modules too.
+        </p>
+     </div>
+     
+     <div class="page-header">
+     	<h1>Upload</h1>
+	  </div>
 
+      <div class="btn-group" role="group" aria-label="Upload">
+	      <form enctype="multipart/form-data" method="post" action="upload_testcase.yaws">
+	      	<p>
+	      	<span class="btn btn-default btn-file">Choose File...
+	      		<input type="file" name="foo"></input>
+	      	</span>
+	      	</p><p>
+	      	<input type="text" class="form-control" readonly id="upload-file-info">
+	      	</p><p>
+	      	<button type="submit" class="btn btn-default">Submit</button>
+		  	</p>
+	  	 </form>
+      </div>
 
-addFileChunk(A, [{part_body, Data}|Res], State) ->
-    addFileChunk(A, [{body, Data}|Res], State);
+      <erl>
+      	out(A) ->
+      		case A#arg.querydata of
+      			undefined -> ok;
+      			"upload_successful" ->
+      			{html, "<div class=\"alert alert-success alert-dismissible\" role=\"alert\">
+      				<button type=\"button\" class=\"close\" data-dismiss=\"alert\"><span aria-hidden=\"true\">&times;</span><span class=\"sr-only\">Close</span></button>
+      				<strong>Gratulation!</strong> Upload is successful!
+      				</div>"};
+	      		Error ->
+	      			{html, "<div class=\"alert alert-danger alert-dismissible\" role=\"alert\">
+	      					<button type=\"button\" class=\"close\" data-dismiss=\"alert\"><span aria-hidden=\"true\">&times;</span><span class=\"sr-only\">Close</span></button>
+	      					<strong>Alert!</strong> Check file, it's not looking good <p>" ++ 
+	      					re:replace(
+	      							   re:replace(Error, "%20", " ", [global, {return, list}]),
+	      							   "%22", "", [global, {return, list}])
+	      					++ "</p>.
+	      					</div>"}
+      		end.
+      	</erl>
+      	
+    </div> <!-- /container -->
 
-addFileChunk(_A, [], State) when State#upload.last==true,
-                                 State#upload.filename /= undefined,
-                                 State#upload.fd /= undefined ->
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="dist/js/bootstrap.min.js"></script>
+    <script>
+    $(document).on('change', '.btn-file :file', function() {
+    	  var input = $(this),
+    	      numFiles = input.get(0).files ? input.get(0).files.length : 1,
+    	      label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
+    	  input.trigger('fileselect', [numFiles, label]);
+    	});
 
-    file:close(State#upload.fd),
-    Name = State#upload.filename,
-    Module = erlang:list_to_atom(string:sub_word(Name, 1, $.)),
-    {ok, DIR} =  application:get_env(fixTestErl, test_cases_dir),
-    C = compile:file(DIR ++ Name, [{outdir,DIR},verbose,report_errors]),
-    io:format("Compile: ~p~n", [C]),
-    code:load_file(Module),
-    Res = {ehtml,
-           {p,[], "File upload done"}},
-    {done, {redirect, "/mainwindow.yaws"}};
-
-addFileChunk(A, [], State) when State#upload.last==true ->
-    {done, err()};
-
-addFileChunk(_A, [], State) ->
-    {cont, State};
-
-addFileChunk(A, [{head, {_Name, Opts}}|Res], State ) ->
-    case lists:keysearch("filename", 1, Opts) of
-        {value, {_, Fname0}} ->
-            Fname = yaws_api:sanitize_file_name(basename(Fname0)),
-
-            %% we must not put the file in the
-            %% docroot, it may execute uploade code if the
-            %% file is a .yaws file !!!!!
-            {ok, DIR} =  application:get_env(fixTestErl, test_cases_dir),
-  	    case file:open([DIR, Fname] ,[write]) of
-		{ok, Fd} ->
-		    S2 = State#upload{filename = Fname,
-				      fd = Fd},
-		    addFileChunk(A, Res, S2);
-		Err ->
-		    {done, err()}
-	    end;
-	false ->
-            addFileChunk(A,Res,State)
-    end;
-
-addFileChunk(A, [{body, Data}|Res], State)
-  when State#upload.filename /= undefined ->
-    case file:write(State#upload.fd, Data) of
-        ok ->
-            addFileChunk(A, Res, State);
-        Err ->
-            {done, err()}
-    end.
-
-
-basename(FilePath) ->
-    case string:rchr(FilePath, $\\) of
-        0 ->
-            %% probably not a DOS name
-            filename:basename(FilePath);
-        N ->
-            %% probably a DOS name, remove everything after last \
-            basename(string:substr(FilePath, N+1))
-    end.
-
-
-</erl>
-
+    $(document).ready( function() {
+    	    $('.btn-file :file').on('fileselect', function(event, numFiles, label) {
+    	        
+    	        var input = $('#upload-file-info'),
+    	            log = numFiles > 1 ? numFiles + ' files selected' : label;
+    	        
+    	        if( input.length ) {
+    	            input.val(log);
+    	        } 
+    	    });
+    	});
+    </script>
+  </body>
+</html>

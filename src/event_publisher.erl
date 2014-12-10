@@ -1,7 +1,7 @@
 -module(event_publisher).
 -behaviour(gen_server).
 
--include("../deps/yaws/include/yaws_api.hrl").
+-include_lib("yaws/include/yaws_api.hrl").
 
 %% API
 -export([out/1]).
@@ -62,7 +62,7 @@ handle_info({ok, YawsPid},#state{sock=S}= State) ->
    sendData(S, [{"","Select test case to show log"}], State#state{yaws_pid=YawsPid});
 handle_info({discard, _YawsPid}, State) ->
     %% nothing to do
-     io:format("discard ~n"),
+     lager:info("discard "),
     {stop, normal, State};
 handle_info({out, M}, #state{sock=Socket, messages = Messages}=State) ->
     NewMessages = lists:sublist([{"<-", M}|Messages], 50),
@@ -71,14 +71,14 @@ handle_info({in, M}, #state{sock=Socket, messages = Messages}=State) ->
     NewMessages = lists:sublist([{"->", M}|Messages], 50),
     sendData(Socket, NewMessages, State#state{messages = NewMessages});
 handle_info({tcp_closed, _}, State) ->
-     io:format("tcp_closed ~n"),
+     lager:info("tcp_closed "),
     {stop, normal, State#state{sock=closed}};
 handle_info(Info, State) ->
-     io:format("Terminate ~s~n", [Info]),
+     lager:info("Terminate ~s", [Info]),
     {noreply, State}.
 
 terminate(Reason, #state{sock=Socket, yaws_pid=YawsPid}) ->
-    io:format("Terminate ~s~n", [Reason]),
+    lager:info("Terminate ~s", [Reason]),
     yaws_api:stream_process_end(Socket, YawsPid),
     ok.
 

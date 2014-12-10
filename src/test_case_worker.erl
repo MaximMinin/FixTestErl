@@ -14,7 +14,6 @@
 %% --------------------------------------------------------------------
 %% External exports
 -export([start_link/2, newMessage/2, 
-         getMessages/2, getMessages/3, 
          send/2]).
 
 %% gen_server callbacks
@@ -32,12 +31,7 @@ start_link(Name, Mode) ->
 
 newMessage(Name, Message)->
     gen_server:cast(Name, {message, Message}).
-getMessages(Name, RegExp) ->
-    gen_server:call(list_to_atom(lists:concat([archiv_, Name])),
-                                 {getMessages, RegExp}).
-getMessages(Name, From, To) ->
-    gen_server:call(list_to_atom(lists:concat([archiv_, Name])),
-                                 {getMessages, From, To}).
+
 send(Name, Messages)->
     gen_server:cast(Name, {send, Messages}).
 
@@ -134,7 +128,7 @@ handle_info(_Info, State) ->
 %% Returns: any (ignored by gen_server)
 %% --------------------------------------------------------------------
 terminate(Reason, _State) ->
-    io:format("REASON: ~p~n", [Reason]),
+    lager:info("REASON: ~p", [Reason]),
     ok.
 
 %% --------------------------------------------------------------------

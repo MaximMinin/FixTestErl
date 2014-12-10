@@ -13,4 +13,4 @@ out(A) ->
     EventPublisher = erlang:list_to_atom(L),
     TestCase = erlang:list_to_atom(T),
     event_publisher:register_test_case(EventPublisher, TestCase),
-{redirect, "/mainwindow.yaws"}.
+{redirect, "/log.html"}.

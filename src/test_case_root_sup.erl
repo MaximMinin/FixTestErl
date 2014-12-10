@@ -42,7 +42,7 @@ init([Testcase, Mode, Ip, Port, FixVersion]) ->
                                 {
                                     test_archive_sup,
                                     {test_archive_sup, 
-                                     start_link, [Testcase]},
+                                     start_link, [Testcase, FixVersion]},
                                     permanent, infinity, supervisor,
                                     [test_archive_sup]
                                 },

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="Maxim Minin">
+    <link rel="icon" href="../images/fixTestErl.jpg">
+
+    <title>FixTestErl Template</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap theme -->
+    <link href="dist/css/bootstrap-theme.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="theme.css" rel="stylesheet">
+
+  </head>
+
+  <body role="document">
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="https://github.com/MaximMinin/FixTestErl">[Fix || Test <- Erl]</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li><a href="index.yaws">Home</a></li>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Player <span class="caret"></span></a>
+              <ul class="dropdown-menu" role="menu">
+                <li><a href="scenarios.yaws">Scenarios</a></li>
+                <li><a href="records.yaws">Records</a></li>
+              </ul>
+            </li>
+            <li class="active" class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Recorder <span class="caret"></span></a>
+              <ul class="dropdown-menu" role="menu">
+                <li><a href="upload.yaws">Upload</a></li>
+                <li><a href="generate.yaws">Generate</a></li>
+                <li class="active"><a href="record.yaws">Record</a></li>
+              </ul>
+            </li>
+            <li><a href="viewer.yaws">Viewer</a></li>
+            <li><a href="help.yaws">Help</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container theme-showcase" role="main">
+
+      <!-- Main jumbotron for a primary marketing message or call to action -->
+      <div class="jumbotron">
+        <h1>FixTestErl</h1>
+        <p>
+            You can record fix communication here and play it later than.
+        </p>
+     </div>
+
+
+      <div class="page-header">
+        <h1>TODO</h1>
+      </div>
+
+
+
+    </div> <!-- /container -->
+
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="dist/js/bootstrap.min.js"></script>
+  </body>
+</html>

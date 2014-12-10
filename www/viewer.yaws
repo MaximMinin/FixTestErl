@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="Maxim Minin">
+    <link rel="icon" href="../images/fixTestErl.jpg">
+
+    <title>FixTestErl Template</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap theme -->
+    <link href="dist/css/bootstrap-theme.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="theme.css" rel="stylesheet">
+    
+    <script type="text/javascript">
+    var WS = false;
+    if (window.WebSocket) WS = WebSocket;
+    if (!WS && window.MozWebSocket) WS = MozWebSocket;
+    if (!WS)
+        alert("WebSocket not supported by this browser");
+    function $() { return document.getElementById(arguments[0]); }
+    function $F() { return document.getElementById(arguments[0]).value; }
+var client = {
+connect: function(){
+    
+    <erl>
+    out(A) ->
+        Host = (A#arg.headers)#headers.host,
+        {abs_path, Path} = (A#arg.req)#http_request.path,
+        EndpointPath = filename:dirname(Path) ++ "log_handler_endpoint.yaws",
+        WebSocketLocation = Host ++ EndpointPath,
+        B = "this._ws=new WS(\"ws://" ++ WebSocketLocation ++ "\");",
+        {content, "text/html", B}.
+    </erl>
+    
+    this._ws.onopen=this._onopen;
+    this._ws.onmessage=this._onmessage;
+    this._ws.onclose=this._onclose;
+    $("msgs").innerHTML="";
+},
+
+_onopen: function(){
+    $("connect").className="hidden";
+    $("connected").className="";
+    $("options").className="hidden";
+    $("phrase").focus();
+    client._send("client-connected");
+},
+
+_send: function(message){
+    if (this._ws)
+        this._ws.send(message);
+},
+
+chat: function(text) {
+    if (text != null && text.length>0 )
+        client._send(text);
+},
+
+_onmessage: function(m) {
+    if (m.data){
+        var text = m.data;
+        var msg=$("msgs");
+        var oldMsg = msg.innerHTML;
+        var spanText = document.createElement("span");
+        spanText.className="text";
+        spanText.innerHTML=(text + "\n" + oldMsg).substr(0, 10000).replace(/\n/g , "<br>");;
+        msg.innerHTML= spanText.innerHTML;
+        msg.scrollTop = msg.scrollHeight - msg.clientHeight;
+    }
+},
+
+_onclose: function(m) {
+    this._ws=null;
+    $("connect").className="";
+    $("connected").className="hidden";
+    $("stopshowlog").className="hidden";
+    $("options").className="";
+}
+};
+function showlog(event) {
+    $("connected").className="hidden";
+    $("connect").className="hidden";
+    $("stopshowlog").className="";
+    client.chat(event.value); 
+    return false;
+};
+function stopshowlog(event) {
+    $("connected").className="hidden";
+    $("stopshowlog").className="hidden";
+    $("connect").className="";
+    client.chat(event.value); 
+    client._ws.close();
+    $("msgs").innerHTML="";
+    return false;
+};</script>
+
+  </head>
+
+  <body role="document">
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="https://github.com/MaximMinin/FixTestErl">[Fix || Test <- Erl]</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li><a href="index.yaws">Home</a></li>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Player <span class="caret"></span></a>
+              <ul class="dropdown-menu" role="menu">
+                <li><a href="scenarios.yaws">Scenarios</a></li>
+                <li><a href="records.yaws">Records</a></li>
+              </ul>
+            </li>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Recorder <span class="caret"></span></a>
+              <ul class="dropdown-menu" role="menu">
+                <li><a href="upload.yaws">Upload</a></li>
+                <li><a href="generate.yaws">Generate</a></li>
+                <li><a href="record.yaws">Record</a></li>
+              </ul>
+            </li>
+            <li class="active"><a href="viewer.yaws">Viewer</a></li>
+            <li><a href="help.yaws">Help</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container theme-showcase" role="main">
+
+      <!-- Main jumbotron for a primary marketing message or call to action -->
+      <div class="jumbotron">
+        <h1>FixTestErl</h1>
+        <p>
+            You can view running scenarios here.
+        </p>
+     </div>
+
+
+      <div class="page-header">
+        <h1>TODO</h1>
+      </div>
+
+
+
+    </div> <!-- /container -->
+
+     <div id="connect">
+         <input id="cA" class="button" type="submit" name="connect" value="Connect"/>
+     </div>
+     <br/>
+    <div id="connected" class="hidden">
+         <input class="showlog" type="submit" name="quote" value="quote" onclick="showlog(this);"/>
+         <input class="showlog" type="submit" name="quoteRequest" value="quoteRequest" onclick="showlog(this);"/>
+     </div>
+     <div id="stopshowlog" class="hidden">
+         <input class="stopshowlog" type="submit" name="stop" value="stop" onclick="stopshowlog(this);"/>
+     </div>
+     <div id="msgs"></div>
+
+     <script type="text/javascript">
+     $("cA").onclick = function(event) { 
+            client.connect();
+            return false;
+     };
+    </script>
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+  </body>
+</html>

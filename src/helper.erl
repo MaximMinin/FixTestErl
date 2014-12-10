@@ -15,43 +15,15 @@
 %%
 %% API Functions
 %%
-%% <<"20000426-12:05:06">> 
 getNow(AddTimeInSec) ->
     AddSec = AddTimeInSec rem 60,
     AddMin = AddTimeInSec div 60,
     {{Year, Month, Day}, {Hour, Minute, Second}} = erlang:universaltime(),
-    erlang:list_to_binary(lists:concat([
-                                        erlang:integer_to_list(Year),
-                                        getTwoDigits(Month),
-                                        getTwoDigits(Day),
-                                        "-",
-                                        getTwoDigits(Hour),
-                                        ":",
-                                        getTwoDigits(Minute+AddMin),
-                                        ":",
-                                        getTwoDigits(Second+AddSec)
-                                       ]
-                                      )
-                         ).
+	{{Year, Month, Day}, {Hour, Minute+AddMin, Second+AddSec}}.
+
 getNow() ->
-    {{Year, Month, Day}, {Hour, Minute, Second}} = erlang:universaltime(),
-    erlang:list_to_binary(lists:concat([
-                                        erlang:integer_to_list(Year),
-                                        getTwoDigits(Month),
-                                        getTwoDigits(Day),
-                                        "-",
-                                        getTwoDigits(Hour),
-                                        ":",
-                                        getTwoDigits(Minute),
-                                        ":",
-                                        getTwoDigits(Second)
-                                       ]
-                                      )
-                         ).
-getTwoDigits(Int) when Int < 10 ->
-    lists:concat(["0",Int]);
-getTwoDigits(Int) ->
-    erlang:integer_to_list(Int).
+    erlang:universaltime().
+
 
 getIniq () ->
     {MegaSecs, Secs, MicroSecs} = erlang:now(),

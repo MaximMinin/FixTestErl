@@ -11,6 +11,7 @@
 %%
 %% Exported Functions
 %%
+-compile([{parse_transform, lager_transform}]).
 -export([reply/3, ini/0, get_mod/0, get_ip/0, get_port/0, get_fix_version/0, sendQuote/1]).
 
 %%
@@ -26,37 +27,32 @@ get_ip() ->
     localhost.
 
 
+reply({R, _}, SeqNumIn, SeqNumOut) ->
+	reply(R, SeqNumIn, SeqNumOut);
 reply(#quote{standardHeader = #standardHeader{msgSeqNum =999}},  _SeqNumIn, _SeqNumOut)->
-    io:format("Quote - END: ~p~n", [erlang:now()]),
+%%     lager:info("Quote - END: ~p", [erlang:now()]),
     ok;
 reply(#heartbeat{} = H, _SeqNumIn, _SeqNumOut)->
-    io:format("Quote - Heartbeat: ~p~n", [H]),
-    [#heartbeat{ standardHeader = #standardHeader{beginString = auto,
-                                                          msgType = heartbeat,
-                                                          bodyLength = auto,
-                                                          senderCompID = <<"TEST_ONE">>,
-                                                  targetCompID = <<"TEST_TWO">>
+    lager:info("Quote - Heartbeat: ~p", [H]),
+    [#heartbeat{ standardHeader = #standardHeader{msgType = heartbeat,
+                                                  senderCompID = "TEST_ONE",
+                                                  targetCompID = "TEST_TWO"
                                                 },
-                standardTrailer = #standardTrailer{checkSum=auto}
+                standardTrailer = #standardTrailer{}
                }];
-reply(_Msg,  _SeqNumIn, _SeqNumOut)->
-%%    io:format("Quote - Msg: ~p~n", [Msg]),
+reply(Msg,  _SeqNumIn, _SeqNumOut)->
+%%    lager:info("Quote - Msg: ~p", [Msg]),
     ok.
 
 ini()->
     spawn(?MODULE, sendQuote, [2]),
     [#logon{
             resetSeqNumFlag = yes,
-            standardTrailer = #standardTrailer{
-                                               checkSum = auto                                               
-                                               },
-            standardHeader = #standardHeader{
-                                             beginString = auto,
-                                             bodyLength = auto,
-                                             msgType = logon,
+            standardTrailer = #standardTrailer{},
+            standardHeader = #standardHeader{msgType = logon,
                                              msgSeqNum = 1,
-                                             senderCompID = <<"TEST_ONE">>,
-                                             targetCompID = <<"TEST_TWO">>
+                                             senderCompID = "TEST_ONE",
+                                             targetCompID = "TEST_TWO"
                                              }
            }
     ].
@@ -64,21 +60,19 @@ ini()->
 %% Local Functions
 %%
 sendQuote(1000)->
-    io:format("END: ~p ~n", [erlang:now()]),
+    lager:info("END: ~p ", [erlang:now()]),
     ok;
 sendQuote(Number)->
-timer:sleep(5000),
-test_case_worker:send(?MODULE, [#quoteRequest{standardHeader = #standardHeader{beginString = auto, 
-                                                                               bodyLength=auto,
-                                                                               msgType = quoteRequest,
-                                                                               senderCompID = <<"TEST_ONE">>,
-                                                                               targetCompID = <<"TEST_TWO">>,
+timer:sleep(15000),
+test_case_worker:send(?MODULE, [#quoteRequest{standardHeader = #standardHeader{msgType = quoteRequest,
+                                                                               senderCompID = "TEST_ONE",
+                                                                               targetCompID = "TEST_TWO",
                                                                                msgSeqNum = Number,
                                                                                sendingTime = helper:getNow()},
                                   quoteReqID = helper:getIniq(),
-                                  rgr_quoteRequest_146 = [#rgr_quoteRequest_146{symbol = <<"TEST">>,
-                                                                                   securityID = <<"TEST">>}],
-                                                 standardTrailer = #standardTrailer{checkSum = auto}
+                                  rgr_quoteRequest_146 = [#rgr_quoteRequest_146{symbol = "TEST",
+                                                                                   securityID = "TEST"}],
+                                                 standardTrailer = #standardTrailer{}
                                                  }
                                    ]),
     sendQuote(Number+1).

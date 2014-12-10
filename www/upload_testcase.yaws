@@ -1,0 +1,5 @@
+<erl>
+out(A)->
+	fte_html_utils:upload(A).
+</erl>
+

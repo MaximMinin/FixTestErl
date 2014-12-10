@@ -25,7 +25,7 @@ run() ->
                 ],
     {ok, SCList, GC, ChildSpecs} =
         yaws_api:embedded_start_conf(Docroot, SconfList, GconfList, Id),
-    [supervisor:start_child(ybed_sup, Ch) || Ch <- ChildSpecs],
+    [supervisor:start_child(fte_ybed_sup, Ch) || Ch <- ChildSpecs],
     yaws_api:setconf(GC, SCList),
     {ok, self()}.
 

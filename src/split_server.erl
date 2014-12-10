@@ -93,8 +93,9 @@ handle_cast({new, Data},
     lists:map(fun(M) ->
               Reg = fix_convertor:fix2record(M, V), 
               test_case_worker:newMessage(ClientPid, Reg),
+			  {R, _} = Reg,
               lists:map(fun(Pid) -> 
-                  Pid ! {in, fix_convertor:format(Reg, V)} end, W)
+                  Pid ! {in, fix_convertor:format(R, V)} end, W)
               end, Messages),
     {noreply, State#state{last = Broken}}.
 

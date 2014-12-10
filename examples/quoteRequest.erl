@@ -11,7 +11,7 @@
 %% Exported Functions
 %%
 -export([reply/3, ini/0, get_mod/0, get_ip/0, get_port/0, get_fix_version/0]).
-
+-compile([{parse_transform, lager_transform}]).
 %%
 %% API Functions
 %%
@@ -25,24 +25,23 @@ get_ip() ->
     localhost.
 ini()->
 [
-     #logon{standardHeader = #standardHeader{beginString = auto,
-                                                      bodyLength = auto,
-                                                      msgType = logon,
-                                                      senderCompID = <<"TEST_TWO">>,
-                                                      targetCompID = <<"TEST_ONE">>,
-                                                      msgSeqNum = 1,
-                                                      senderSubID = <<"Prod_1">>,
-                                                      sendingTime = helper:getNow()},
-                   encryptMethod = none,
-                   heartBtInt = 30,
-                   standardTrailer = #standardTrailer{checkSum = auto} 
-                   }
+     #logon{standardHeader = #standardHeader{msgType = logon,
+                                             senderCompID = "TEST_TWO",
+                                             targetCompID = "TEST_ONE",
+                                             msgSeqNum = 1,
+                                             senderSubID = "Prod_1",
+                                             sendingTime = helper:getNow()},
+             encryptMethod = none,
+             heartBtInt = 30,
+             standardTrailer = #standardTrailer{} 
+      }
  
  ].
 
 reply(M, I, O) ->
-    io:format("QuoteRequestWorker get message: ~p~n", [M]),
-    reply_local(M,I,O).
+%%     lager:info("QuoteRequestWorker get message: ~p~n", [M]),
+	{R,_} = M,
+    reply_local(R,I,O).
 %%
 %% Local Functions
 %%
@@ -50,20 +49,18 @@ reply(M, I, O) ->
 %% LOGON -> ok
 %% <<"8=FIX.4.2",1,"9=67",1,"35=A",1,"49=TEST_TWO",1,"56=TEST_ONE",1,"34=18",1,
 %% "52=20120529-14:42:25.795",1,"98=0",1,"108=30",1,"10=048",1>>.
-reply_local(#logon{standardHeader = #standardHeader{senderCompID = <<"TEST_ONE">>, 
-                                              targetCompID = <<"TEST_TWO">> }}, _In, _Out) ->
+reply_local(#logon{standardHeader = #standardHeader{senderCompID = "TEST_ONE", 
+                                              targetCompID = "TEST_TWO" }}, _In, _Out) ->
     ok;
 reply_local(#logon{standardHeader = #standardHeader{senderCompID = Sender}}, SeqNumIn, _Out) ->
-    [#logout{text = <<"Sender unknown">>,
-            standardHeader = #standardHeader{beginString = auto,
-                                             bodyLength = auto,
-                                             msgType = quote,
+    [#logout{text = "Sender unknown",
+            standardHeader = #standardHeader{msgType = quote,
                                              msgSeqNum = SeqNumIn +1,
                                              sendingTime = helper:getNow(),
-                                             senderCompID = <<"TEST_TWO">>,
+                                             senderCompID = "TEST_TWO",
                                              targetCompID = Sender,
-                                             senderSubID = <<"Prod_1">>},
-            standardTrailer = #standardTrailer{checkSum = auto}
+                                             senderSubID = "Prod_1"},
+            standardTrailer = #standardTrailer{}
              }
     ];
 %% <<"8=FIX.4.2",1,"9=55",1,"35=5",1,"49=TEST_TWO",1,"56=TEST_ONE",1,
@@ -91,15 +88,13 @@ reply_local(#quoteRequest{quoteReqID = QuoteReqID,
             symbol = Isin,
             quoteID = helper:getIniq(),
             quoteReqID = QuoteReqID,
-            standardHeader = #standardHeader{beginString = auto,
-                                             bodyLength = auto,
-                                             msgType = quote,
+            standardHeader = #standardHeader{msgType = quote,
                                              msgSeqNum = SeqNumIn +1,
                                              sendingTime = helper:getNow(),
-                                             senderCompID = <<"TEST_TWO">>,
-                                             targetCompID = <<"TEST_ONE">>,
-                                             senderSubID = <<"Prod_1">>},
-            standardTrailer = #standardTrailer{checkSum = auto}
+                                             senderCompID = "TEST_TWO",
+                                             targetCompID = "TEST_ONE",
+                                             senderSubID = "Prod_1"},
+            standardTrailer = #standardTrailer{}
             }];
 
 %% ORDER -> ORDERACK
@@ -115,15 +110,13 @@ reply_local(#orderSingle{quoteID = QuoteId, clOrdID = OrderId}, SeqNumIn, _SeqNu
      #executionReport{
                       clOrdID = OrderId,
                       orderID = todo,
-            standardHeader = #standardHeader{beginString = auto,
-                                             bodyLength = auto,
-                                             msgType = quote,
+            standardHeader = #standardHeader{msgType = quote,
                                              msgSeqNum = SeqNumIn +1,
                                              sendingTime = helper:getNow(),
-                                             senderCompID = <<"TEST_TWO">>,
-                                             targetCompID = <<"TEST_ONE">>,
-                                             senderSubID = <<"Prod_1">>},
-            standardTrailer = #standardTrailer{checkSum = auto}
+                                             senderCompID = "TEST_TWO",
+                                             targetCompID = "TEST_ONE",
+                                             senderSubID = "Prod_1"},
+            standardTrailer = #standardTrailer{}
                       
                       }
      ];
@@ -134,15 +127,13 @@ reply_local(#orderSingle{quoteID = QuoteId, clOrdID = OrderId}, SeqNumIn, _SeqNu
 %% "34=21",1,"52=20120529-14:42:36.235",1,"10=244",1>>.
 reply_local(#testRequest{testReqID = TestReqID}, SeqNumIn, _SeqNumOut) ->
   [
-     #heartbeat{standardHeader = #standardHeader{beginString = auto, 
-                                                          bodyLength = auto, 
-                                                          msgType = heartbeat,
-                                                          senderCompID = <<"TEST_TWO">>,
-                                                          targetCompID = <<"TEST_ONE">>,
+     #heartbeat{standardHeader = #standardHeader{msgType = heartbeat,
+                                                          senderCompID = "TEST_TWO",
+                                                          targetCompID = "TEST_ONE",
                                                           msgSeqNum = SeqNumIn +1,
                                                           sendingTime = helper:getNow()}, 
                        testReqID = TestReqID, 
-                       standardTrailer = #standardTrailer{checkSum = auto}}
+                       standardTrailer = #standardTrailer{}}
    ];
 
 %%SESSIONLEVELREJECT
@@ -154,13 +145,11 @@ reply_local(_Msg, SeqNumIn, SeqNumOut)->
     [
      #reject{
              refSeqNum = SeqNumOut,
-             standardHeader = #standardHeader{beginString = auto,
-                                              bodyLength = auto,
-                                              msgType = reject,
+             standardHeader = #standardHeader{msgType = reject,
                                               msgSeqNum = SeqNumIn+1,
-                                              senderCompID = <<"TEST_TWO">>,
-                                              targetCompID = <<"TEST_ONE">>,
+                                              senderCompID = "TEST_TWO",
+                                              targetCompID = "TEST_ONE",
                                               sendingTime = helper:getNow()},
-             standardTrailer = #standardTrailer{checkSum = auto}
+             standardTrailer = #standardTrailer{}
              }
      ].

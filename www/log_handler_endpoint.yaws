@@ -1,0 +1,18 @@
+<erl>
+out(A) ->
+    CallbackMod = fte_hmtl_log_handler,
+    KeepAlive = false,
+    Tout = infinity,
+    Drop = false,
+    CloseUnmasked = false,
+    %% Opts = [{origin, any}],
+    %% accept calls from any origin.
+    Opts = [
+            {origin, "http://" ++ (A#arg.headers)#headers.host},
+            {keepalive, KeepAlive},
+            {keepalive_timeout, Tout},
+            {drop_on_timeout, Drop},
+            {close_if_unmasked, CloseUnmasked}
+            ],
+    {websocket, CallbackMod, Opts}.
+</erl>
